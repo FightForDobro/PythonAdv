@@ -6,14 +6,12 @@ def decorator(times=1):
 
         def wrapper(*args, **kwargs):
             time_list = []
-            full_time = time.time()
 
             for i in range(times):
 
                 full_time = time.time()
                 result = func(*args, **kwargs)
                 time_list.append(time.time() - full_time)
-
 
             return result, func.__name__, time.process_time(), time_list
 
@@ -26,6 +24,7 @@ def decorator(times=1):
 def multiply(x, y):
 
     return x * y
+
 
 result = multiply(5, 5)
 
