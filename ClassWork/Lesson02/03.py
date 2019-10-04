@@ -1,4 +1,4 @@
-class Dots:
+class Dot:
 
     AXES = {
             0: 'x',
@@ -6,88 +6,93 @@ class Dots:
             2: 'z'
     }
 
-    def __init__(self, f_coordinates, s_coordinates):
+    def __init__(self, x, y, z):
 
-        self._first_cords = f_coordinates
-        self._second_cords = s_coordinates
+        self._x = x
+        self._y = y
+        self._z = z
 
-    def get_coordinates(self, which, coordinate=-1):
+    def get_coordinates(self):
         """
-        Function prints chosen coordinates
-        :param which: Choose between 1 or 2 coordinate
-        :param coordinate: If left blank print x,y,z else print chosen coordinate
-        :type which: int
-        :type coordinate: int
-        :return: Print current value of coordinate
+        Function gets list of value
+        :return: list of value
         :rtype: str
         """
 
-        coord = self.choose_axe(which)
+        return list(self.__dict__.values())
 
-        if coordinate >= 0 <= 2:
-            return f'{Dots.AXES[coordinate]} is: {coord[coordinate]}'
-
-        return f'x is: {coord[0]}\ny is: {coord[1]}\nz is: {coord[2]}'
-
-    def set_coordinate_value(self, which, coordinate, value):
+    def set_coordinate_value(self, coordinate, value):
         """
         Function set value to coordinate
-        :param which: Choose between 1 or 2 coordinate
         :param coordinate: Choose which coordinate going be changed
         :param value: Value which you want set
-        :type which: int
-        :type coordinate: int
+        :type coordinate: str
         :type value: int
         :return: Nothing
         """
+        coordinates = self.__dict__
 
-        coord = self.choose_axe(which)
+        coordinate = f'_{coordinate}'
 
-        coord[coordinate] = value
+        if coordinate in coordinates.keys():
 
-    def choose_axe(self, which):
+            self.__dict__[coordinate] = value
+
+    def print_result(self):
         """
-        Function choose axe
-        :param which: Number of coordinate
-        :type which: int
-        :return: Chosen coordinate var
+        Function prints pretty output
+        :return: None
         """
 
-        if which == 1:
-            return self._first_cords
-        else:
-            return self._second_cords
+        print(f'x: {self._x}\n'
+              f'y: {self._y}\n'
+              f'z: {self._z}\n')
 
     def __add__(self, other):
 
-        return self._first_cords[0] + self._second_cords[0], self._first_cords[1] + self._second_cords[1], \
-               self._first_cords[2] + self._second_cords[2]
+        return Dot(
+            self.get_coordinates()[0] + other.get_coordinates()[0],
+            self.get_coordinates()[1] + other.get_coordinates()[1],
+            self.get_coordinates()[2] + other.get_coordinates()[2]
+        )
 
     def __sub__(self, other):
 
-        return self._first_cords[0] - self._second_cords[0], self._first_cords[1] - self._second_cords[1], \
-               self._first_cords[2] - self._second_cords[2]
+        return Dot(
+            self.get_coordinates()[0] - other.get_coordinates()[0],
+            self.get_coordinates()[1] - other.get_coordinates()[1],
+            self.get_coordinates()[2] - other.get_coordinates()[2]
+        )
 
     def __mul__(self, other):
 
-        return self._first_cords[0] * self._second_cords[0], self._first_cords[1] * self._second_cords[1], \
-               self._first_cords[2] * self._second_cords[2]
+        return Dot(
+            self.get_coordinates()[0] * other.get_coordinates()[0],
+            self.get_coordinates()[1] * other.get_coordinates()[1],
+            self.get_coordinates()[2] * other.get_coordinates()[2]
+        )
 
-    def __idiv__(self, other):
+    def __truediv__(self, other):
 
         try:
 
-            return self._first_cords[0] / self._second_cords[0], self._first_cords[1] / self._second_cords[1], \
-                self._first_cords[2] / self._second_cords[2]
+            return Dot(
+                self.get_coordinates()[0] / other.get_coordinates()[0],
+                self.get_coordinates()[1] / other.get_coordinates()[1],
+                self.get_coordinates()[2] / other.get_coordinates()[2]
+            )
 
         except ZeroDivisionError:
             print('You cant divide by zero')
 
 
-f_coord = [1, 2, 3]
-s_coord = [4, 6, 1]
-a = Dots(f_coord, s_coord)
+f_coord = (2, 6, 2)
+s_coord = (4, 3, 2)
 
-print(a.get_coordinates(2))
-print(a.__mul__(a))
-print(a.get_coordinates(2))
+a = Dot(*f_coord)
+b = Dot(*s_coord)
+
+c = a / b
+
+c.print_result()
+
