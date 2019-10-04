@@ -1,4 +1,5 @@
 import time
+from math import factorial
 
 
 def decorator(times=1):
@@ -20,13 +21,12 @@ def decorator(times=1):
     return actual_decorator
 
 
-@decorator(5)
-def multiply(x, y):
+@decorator(1)
+def calculate_numbers_count_in_factorial(x):
+    return len(str(factorial(x)))
 
-    return x * y
 
-
-result = multiply(5, 5)
+result = calculate_numbers_count_in_factorial(52000)
 
 print(f'Your result is: {result[0]}\nFunction name is: {result[1]}\nFull time is: {result[2]} seconds')
 
