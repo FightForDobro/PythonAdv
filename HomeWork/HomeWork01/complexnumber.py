@@ -10,7 +10,7 @@ class ComplexNumber:
     def get_b(self):
         return self._b
 
-    def print_number(self):
+    def __str__(self):
 
         sign = ''
         if self.get_b() > 0:
@@ -61,4 +61,4 @@ z2 = ComplexNumber(5, 5)
 
 r = z1 + z2
 
-print(r.print_number())
+print(r)
