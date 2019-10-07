@@ -1,16 +1,34 @@
 class ComplexNumber:
 
     def __init__(self, a=0, b=0):
+        """
+        Function construct complex number
+        :param a: real number
+        :type a: Union[int, float]
+        :type b: Union[int, float]
+        :param b: imagine number
+        """
         self._a = a
         self._b = b
 
     def get_a(self):
+        """
+        Function return real num
+        """
         return self._a
 
     def get_b(self):
+        """
+        Function return real num
+        """
         return self._b
 
     def __str__(self):
+        """
+        Function prints complex number in correct form
+        :return: String
+        :rtype: str
+        """
 
         sign = ''
         if self.get_b() > 0:
@@ -56,7 +74,7 @@ class ComplexNumber:
             exit(f'ERROR: {ZeroDivisionError.__name__}')
 
 
-z1 = ComplexNumber(5, 2)
+z1 = ComplexNumber(5.3, 2)
 z2 = ComplexNumber(5, 5)
 
 r = z1 + z2
