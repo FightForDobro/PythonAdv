@@ -9,7 +9,6 @@ class Client:
 
     DATABASE = {'fight': {'login': 'fight', 'name': 'Denys', 'surname': 'Ushakov', 'password': 'Qwerty1488!', 'reg_data': '10/11/19', 'user_post': [], 'is_admin': True}}
     ALLPOSTS = []
-    ADMIN = ['admin']
 
     @classmethod
     def validate(cls, user_data: dict):
@@ -174,7 +173,7 @@ class Client:
                   '3. View personal profile\n'
                   '4. Exit\n')
 
-            if self._user_data.get('login') in Client.ADMIN:
+            if self._user_data.get('login') in Client.Admin(self._user_data['login']).is_admin():
                 print('Enter A for go to Admin Menu')
             self.user_interface_logic()
 
@@ -199,7 +198,7 @@ class Client:
             elif choice == '4':
                 Client.Interface().welcome()
 
-            elif choice == 'A' and self._user_data.get('login') in Client.ADMIN:
+            elif choice == 'A' and Client.Admin(self._user_data.get('login')).is_admin():
                 Client.Admin(self._user_data.get('login'))
 
             else:
@@ -215,6 +214,7 @@ class Client:
 
                 try:
                     print(f'{key.capitalize()}: {value.capitalize()}')
+
                 except AttributeError:
                     print(f'{key.capitalize()}: {value}')
 
@@ -232,7 +232,7 @@ class Client:
             """
             super().__init__(login)
 
-            self.is_admin(login)
+            self.is_admin()
 
         @staticmethod
         def make_admin(login):
@@ -242,16 +242,15 @@ class Client:
             """
             Client.DATABASE[login]['is_admin'] = True
 
-        def is_admin(self, login):
+        def is_admin(self):
             """
             Function check user have admin permission or not
-            :param login: User login
             """
 
-            if Client.DATABASE[login]['is_admin']:
+            if Client.DATABASE[self._user_data.get('login')]['is_admin']:
                 self.mode_chooser()
             else:
-                Client.User(login).user_interface()
+                Client.User(self._user_data.get('login')).user_interface()
 
         def mode_chooser(self):
             """
