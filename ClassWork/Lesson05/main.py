@@ -36,28 +36,27 @@
 from threading import Thread
 import time
 import random
-#
-#
-# def random_time_sleep(ti):
-#     print('thread started')
-#     time.sleep(random.randint(ti, 5))
-#     print('thread ended')
-#
-#
-# t = Thread(target=random_time_sleep, args=(5, ), kwargs={}, daemon=True)
-# t.start()
-#
-# print('Main thread process .....')
-#
-# for _ in range(10):
-#     print('Works')
-#     t.join()
-#     time.sleep(0.5)
-#     print('Iteration ended')
-#
-#
-#
-#
+
+
+def random_time_sleep(ti):
+    print('thread started')
+    time.sleep(random.randint(ti, 2))
+    print('thread ended')
+
+
+t = Thread(target=random_time_sleep, args=(1, ), kwargs={}, daemon=True)
+t.start()
+
+print('Main thread process .....')
+
+for _ in range(10):
+    print('Works')
+    time.sleep(0.5)
+    print('Iteration ended')
+
+
+
+
 # class MyThread(Thread):
 #
 #     def __init__(self, name, is_daemon):
@@ -110,26 +109,26 @@ import random
 # $$$$$$$$$$$$$$$$$$$$$$$$$$$$
 #           Shelve
 # $$$$$$$$$$$$$$$$$$$$$$$$$$$$
-import shelve
+# import shelve
+# #
+# filename = 'our_db'
+# #
+# # with shelve.open(filename) as db:
+# #     db['key'] = '1000'
+# #
+# # with shelve.open(filename) as db:
+# #     print(db.get('key'))  # db.items по нему можно итерироваться
 #
-filename = 'our_db'
 #
-# with shelve.open(filename) as db:
-#     db['key'] = '1000'
+# def creat_user(username):
 #
-# with shelve.open(filename) as db:
-#     print(db.get('key'))  # db.items по нему можно итерироваться
-
-
-def creat_user(username):
-
-    with shelve.open(filename) as db:
-        db.has_key(username)  # Если есть юзер експшен
-
-        db[f'{username}_posts'] = ['post_1', 'post_2']
-
-
-def add_post(username):
-
-    with shelve.open(filename) as db:
-        username = db.get(f'{username}_post')
+#     with shelve.open(filename) as db:
+#         db.has_key(username)  # Если есть юзер експшен
+#
+#         db[f'{username}_posts'] = ['post_1', 'post_2']
+#
+#
+# def add_post(username):
+#
+#     with shelve.open(filename) as db:
+#         username = db.get(f'{username}_post')
