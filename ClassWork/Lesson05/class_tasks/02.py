@@ -28,7 +28,7 @@ def multi_thread_download(url):
 
         print(f'Time that takes to download: {f_t[0] - s_t[0]}.{f_t[1] - s_t[1]}.{f_t[2] - s_t[2]}')
 
-    except Exception:
+    except (urllib.error.HTTPError, urllib.error.URLError):
         print(f'Downloading file {path} failed')
 
 for i in url_list:

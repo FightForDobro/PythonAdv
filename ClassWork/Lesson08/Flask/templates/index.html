@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    {% if title %}
+    <title>{{ title }}</title>
+    {% else %}
+    <titl>My page</titl></title>
+    {% endif %}
+</head>
+<body>
+
+    <div style="text-align: center;"><h1>Hi i am header one</h1></div>
+    <div style="text-align: center;"><p>I am paragraph</p></div>
+
+    <p>{{ data }}</p>
+
+    <div style="text-align: center;"><h1> Our Users </h1></div>
+
+    {% for username, status in users.items()%}
+
+        <div style="text-align: center;"><p>Username: {{ username }} Status: {{ status }}</p></div>
+
+    {% endfor %}
+
+    {% for i in template_list %}
+        <div style="text-align: center;"><p><a href=/get-student-info/{{ i }}>
+        {{ i }}
+        </a></p></div>
+    {% endfor %}
+
+
+</body>
+</html>

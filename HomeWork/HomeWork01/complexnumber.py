@@ -74,9 +74,9 @@ class ComplexNumber:
             exit(f'ERROR: {ZeroDivisionError.__name__}')
 
 
-z1 = ComplexNumber(5.3, 2)
+z1 = ComplexNumber(8, 4)
 z2 = ComplexNumber(5, 5)
 
-r = z1 + z2
+r = z1 / 4
 
 print(r)
