@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<body>
+
+    <div style="text-align: center">
+
+    <img src="{{ product.get('Img Link')}}" height="275" width="375" alt=""/>
+
+    <h1>{{ title }}</h1>
+    {% for key, value in product.items() %}
+        {% if key == 'Price' %}
+            <li>{{ key }}: {{ value }}$</li>
+        {% elif key == 'In Stock' and value == True %}
+            <li>{{ key }}: Yes</li>
+        {% elif key == 'In Stock' and value != True %}
+            <li>{{ key }}: No</li>
+        {% elif key == 'Img Link'%}
+
+        {% else %}
+            <li>{{ key }}: {{ value }}</li>
+        {% endif %}
+    {% endfor %}
+
+    </div>
+
+{% endblock %}

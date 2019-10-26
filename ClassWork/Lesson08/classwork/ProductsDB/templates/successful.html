@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Successful</title>
+</head>
+<body>
+
+    {% if data != Error %}
+        {% for key, value in data.items() %}
+            <p style="text-align: center">{{ key }}: {{ value }}</p>
+        {% endfor %}
+        <p style="text-align: center">DB successful updated</p>
+        <p style="text-align: center">Congratulation!</p>
+
+    {% else %}
+        <p>{{ data }}</p>
+    {% endif %}
+
+</body>
+</html>

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>NOT ADMIN MENU</title>
+</head>
+
+<style>
+    div {
+        margin-bottom: 10px;
+        position: relative;
+    }
+
+    input + span {
+        padding-right: 30px;
+    }
+
+    input:invalid+span:after {
+        position: absolute;
+        content: '✖';
+        padding-left: 5px;
+    }
+
+    input:valid+span:after {
+        position: absolute;
+        content: '✓';
+        padding-left: 5px;
+    }
+
+    *
+    {margin:0;padding:0;}
+
+    h3 {
+        text-align:center;
+    }
+
+    fieldset {
+        width:34.2em; border:1px solid;
+    }
+
+    div {
+        float:left; width:15em; padding:1em;
+    }
+    .divider {
+        border-right:1px solid red;
+    }
+
+    label {
+        clear:both;display:block;margin:3px 0;
+    }
+
+    label input {
+        float:right;
+    }
+</style>
+
+<body>
+
+    <div style="text-align: center">
+        <h1>NOT ADMIN MENU</h1>
+    </div>
+
+    <fieldset>
+        <form action='./additem/' method="post" novalidate>
+        <div class="divider"><h3>ADD ITEM</h3>
+    Product title:<br>
+    <input type="text" id='uname' name='p_name' placeholder="Potato" required>
+    <span class="validity"></span>
+
+    <br>In Stock:<br>
+    <input type="radio" name='in_stock' value='1' checked> Yes<br>
+    <input type="radio" name='in_stock' value='0'> No<br>
+
+    Number of units:<br>
+    <input type='text' id='uname' name="number_of_units" required
+           pattern='[0-9]{0,}'>
+    <span class="validity"></span>
+
+    <br>Price:<br>
+    <input type="text" id="uname" name="price" required
+           pattern="[0-9]{0,}"> $
+    <span class="validity"></span>
+
+    <br>Image Link:<br>
+    <input type="url" id="uname" name="img_link" required>
+    <span class="validity"></span>
+
+    <br>Category:<br>
+    <select name="category_id">
+        {% for key, value in categorys.items() %}
+        <option value="{{ key }}"> {{ value.capitalize() }}</option>
+        {% endfor %}
+
+
+
+    </select><br>
+
+    <br><input type="submit">
+
+        </div>
+        </form>
+        <form action='./edititem/' method="post" novalidate>
+        <div><h3>EDIT ITEM</h3>
+        Choose product:<br>
+            <select name="c_p_name">
+            {% for category in products.values() %}
+                {% for key, value in category.items() %}
+                <option value="{{ key }}">{{ key }}</option>
+                {% endfor %}
+            {% endfor %}
+            </select>
+
+                <br>Product title:<br>
+        <input type="text" id='uname' name='p_name' placeholder="Potato" required>
+        <span class="validity"></span>
+
+        <br>In Stock:<br>
+        <input type="radio" name='in_stock' value='1' checked> Yes<br>
+        <input type="radio" name='in_stock' value='0'> No<br>
+
+        Number of units:<br>
+        <input type='text' id='uname' name="number_of_units" required
+               pattern='[0-9]{0,}'>
+        <span class="validity"></span>
+
+        <br>Price:<br>
+        <input type="text" id="uname" name="price" required
+               pattern="[0-9]{0,}"> $
+        <span class="validity"></span>
+
+        <br>Image Link:<br>
+        <input type="url" id="uname" name="img_link" required>
+        <span class="validity"></span>
+
+        <br>Category:<br>
+        <select name="category_id">
+            {% for key, value in categorys.items() %}
+            <option value="{{ key }}"> {{ value.capitalize() }}</option>
+            {% endfor %}
+
+
+        </select><br>
+
+        <br><input type="submit" formaction="./edititem/">
+        </div>
+        </form>
+    </fieldset>
+
+    </form>
+
+</body>
+
+</html>
