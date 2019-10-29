@@ -1,3 +1,6 @@
+#TODO DATA_ART
+
+
 from flask import (Flask,
                    request,
                    jsonify)
@@ -14,6 +17,7 @@ def hello_world():
 
     else:
         return jsonify({'error_code': 'wrong_auth'})
+
 
 if __name__ == '__main__':
     app.run(debug=True)
