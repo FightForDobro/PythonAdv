@@ -1,0 +1,150 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+
+    <h1>Student DataBase</h1>
+
+    <div class="panel" id="create">
+
+        <div class="panel__content">
+
+            <form action='{{ url_for('successful', crud_status='create') }}' method='post'>
+
+                <p>Student Name:</p>
+                    <input type="text" name='name'>
+                <br>
+
+                <p>Student Surname:</p>
+                    <input type="text" name='surname'>
+                <br>
+
+                <p>Student Middle Name:</p>
+                    <input type="text" name='m_name'>
+                <br>
+
+                <p>Student Group:</p>
+                    <input type="text" name='group'>
+                <br>
+
+                <p>Student marks:</p>
+                    <input type="text" name='marks'>
+                <br>
+
+                <p>Student Curator:</p>
+                    <input type="text" name='curator'>
+                <br>
+
+                <p>Student Faculty:</p>
+                    <input type="text" name='faculty'>
+                <br>
+
+                <input style="text-align: center" type="submit" id="btn">
+
+                <br>
+
+                <a href="#home" > CLOSE </a>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <div class="panel" id="read">
+        <div class="panel__content">
+            <form action='{{ url_for('successful', crud_status='read') }}' method='post'>
+
+                <p>Student ID:</p>
+                    <input type="number" name='student_id'>
+                <br>
+
+                <input style="text-align: center" type="submit" id="btn">
+
+                <br>
+
+                <a href="#home" > CLOSE </a>
+
+            </form>
+        </div>
+    </div>
+
+
+    <div class='panel' id='update'>
+        <div class="panel__content">
+
+            <form action='{{ url_for('successful', crud_status='update') }}' method='post'>
+
+                <p>Student id:</p>
+                    <input type='number' name='student_id'>
+                <br>
+
+                <p>Student Name:</p>
+                    <input type='text' name='name'>
+                <br>
+
+                <p>Student Surname:</p>
+                    <input type='text' name='surname'>
+                <br>
+
+                <p>Student Middle Name:</p>
+                    <input type='text' name='m_name'>
+                <br>
+
+                <p>Student Group:</p>
+                    <input type='text' name='group'>
+                <br>
+
+                <p>Student marks:</p>
+                    <input type='text' name='marks'>
+                <br>
+
+                <p>Student Curator:</p>
+                    <input type='text' name='curator'>
+                <br>
+
+                <p>Student Faculty:</p>
+                    <input type='text' name='faculty'>
+                <br>
+
+                <input style='text-align: center' type='submit' id='btn'>
+
+                <br>
+
+                <a href='#home' > CLOSE </a>
+
+            </form>
+
+        </div>
+    </div>
+
+    <div class="panel" id="delete">
+        <div class="panel__content">
+
+            <form action='{{ url_for('successful', crud_status='delete') }}' method='post'>
+
+                <p>Student ID:</p>
+                    <input type="number" name='student_id'>
+                <br>
+
+                <input style="text-align: center" type="submit" id="btn">
+
+                <br>
+                <a href="#home" > CLOSE </a>
+
+            </form>
+
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="menu">
+      <a class="menu__link" href="#create" data-hover="Slice">Create</a>
+      <a class="menu__link" href="#read" data-hover="Fade">Read</a>
+      <a class="menu__link" href="#update" data-hover="Slice">Update</a>
+      <a class="menu__link" href="#delete" data-hover="Fade">Delete</a>
+    </div>
+
+    <button onclick="window.open('https://www.latlmes.com/science/python-adv-1'); location.href='/generator/';">DO NOT PRESS</button>
+
+{% endblock %}

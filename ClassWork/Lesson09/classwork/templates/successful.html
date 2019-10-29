@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Successful</title>
+</head>
+<body>
+    <h1 style='text-align: center'> Congratulation </h1>
+
+    {% if student %}
+
+        {% for key, value in student.items() %}
+
+            <p style="text-align: center">{{ key }}: {{ value }}</p>
+
+        {% endfor %}
+
+
+    {% endif %}
+
+</body>
+</html>

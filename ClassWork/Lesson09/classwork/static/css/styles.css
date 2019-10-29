@@ -1,0 +1,218 @@
+/*
+ * Body format
+ */
+
+body {
+
+    background: #b92b27;  /* fallback for old browsers */
+    background: -webkit-linear-gradient(to right, #1565C0, #b92b27);
+    background: linear-gradient(to right, #1565C0, #b92b27);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-family: 'Roboto Slab', serif;
+
+}
+
+
+
+/*
+ * Headers format
+ */
+
+    h1 {
+        position: relative;
+        font-family: sans-serif;
+        text-transform: uppercase;
+        font-size: 2em;
+        letter-spacing: 4px;
+        overflow: hidden;
+        background: linear-gradient(90deg, #ff8100, #ff0001, #ff007d);
+        background-repeat: no-repeat;
+        background-size: 80%;
+        animation: animate 5s linear infinite;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: rgba(255, 255, 255, 0);
+        left:  40%;
+
+
+    }
+
+    p {
+        font-weight: 300;
+        color: #ffffff;
+        user-select: none;
+        text-align: center;
+        margin: 0; }
+
+
+    a {
+        margin-right: 50%;
+        margin-left: 33.5%;
+        text-decoration: none;
+        color: #fff;
+        text-transform: uppercase;
+    }
+
+    @keyframes animate {
+      0% {
+        background-position: -500%;
+      }
+      100% {
+        background-position: 500%;
+      }
+    }
+
+
+ /*
+  * Navigation menu
+  */
+
+    .menu {
+    position: fixed;
+    width: 100vw;
+    pointer-events: none;
+    margin-top: 10vh;
+    text-align: center;
+    z-index: 2; }
+
+    /* Menu link item */
+    .menu__link {
+    display: inline-block;
+    text-decoration: none;
+    background-color: #FFFFFF;
+    color: #000000;
+    pointer-events: auto;
+    line-height: 40px;
+    position: relative;
+    padding: 0 50px;
+    box-sizing: border-box;
+    margin: 0;
+    user-select: none;
+    overflow: hidden;
+    border-radius: 50px;
+
+    ::before {
+    content: attr(data-hover);
+    background-color: #ffffff;
+    color: #FFF;
+    position: absolute;
+    top: 100%;
+    bottom: 0;
+    left: 0;
+    transition: all 300ms cubic-bezier(0.190, 1.000, 0.560, 1.000);
+    right: 0; }
+
+
+    :hover::before {
+    top: 0; }
+
+    }
+
+    /* Panels Style*/
+    /* •••••••••••••••••••••••••••••••• */
+
+    /* Common panel style */
+    .panel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    overflow: auto;
+    z-index: 999;
+    color: #ffffff;
+    box-sizing: border-box;
+    background-color: #ECEFF1; }
+
+
+    /* panel content (only for animation delay after open) */
+    .panel__content {
+    opacity: 0;
+    will-change: margin-top;
+    transition: all 700ms;
+    transition-delay: 600ms;
+    padding: 100px 200px;
+    margin-top: -5%; }
+
+    /* Panel content animation after open */
+    .panel:target .panel__content {
+    opacity: 1;
+    margin-top: 0; }
+
+
+    /*  Specific "Home "panel */
+    /* •••••••••••••••••••••••••••••••• */
+
+    .panel#home {
+    z-index: 1;
+    background: radial-gradient(ellipse at center, rgba(255,255,255,1) 0%,#CFD8DC 100%); }
+
+
+    /*
+     * Specific panel "Slice"
+     */
+
+    .panel#create {
+    background-color: #E53935;
+    transition: all 800ms cubic-bezier(0.190, 1.000, 0.560, 1.000);
+    transform: translate3d( 0, -100%, 0 ); }
+
+    .panel#create:target {
+    transform: translate3d( 0, 0, 0 ); }
+
+    .panel#update {
+    background-color: #e5e000;
+    transition: all 800ms cubic-bezier(0.190, 1.000, 0.560, 1.000);
+    transform: translate3d( 0, -100%, 0 ); }
+
+    .panel#update:target {
+    transform: translate3d( 0, 0, 0 ); }
+
+
+    /*
+     * Specific panel "Fade" effect
+     */
+
+    .panel#read {
+    background-color: #00C853;
+    opacity: 0;
+    transition: all 800ms;
+    pointer-events: none; }
+
+    .panel#read:target {
+    opacity: 1;
+    pointer-events: auto; }
+
+    .panel#delete {
+    background-color: #0b09c8;
+    opacity: 0;
+    transition: all 800ms;
+    pointer-events: none; }
+
+    .panel#delete:target {
+    opacity: 1;
+    pointer-events: auto; }
+
+/*
+ * Buttons
+ */
+
+#btn {
+
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 10px ;
+}
+
+#btn:hover {
+    background-color: #FFCCCC;
+}
+
+/*
+ * Close button
+ */

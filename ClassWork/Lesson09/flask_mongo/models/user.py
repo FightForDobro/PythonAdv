@@ -52,10 +52,10 @@ class Post(Document):
 
 # post = Post(**dict_post).save()
 
-# users = User.objects(
-#     first_name__in=['Jonh', 'Denys']).update(
-#     email='NewMail@icloud.com'
-# )  # GET возвращает обьект а objects quarry set
+users = User.objects(
+    first_name__in=['Jonh', 'Denys'])  # GET возвращает обьект а objects quarry set
+
+print(users)
 
 # for u in users:
 #     print(u)
@@ -63,7 +63,7 @@ class Post(Document):
 #     print(u.birth_of_year)
 #     u.save()
 
-user = User.objects.first()
-
-user.create_post(**{'title': 'new', 'body': 'Hello'})
-user.create_post(**{'title': 'VeryNew', 'body': 'Hello Privet'})
+# user = User.objects.first()
+#
+# user.create_post(**{'title': 'new', 'body': 'Hello'})
+# user.create_post(**{'title': 'VeryNew', 'body': 'Hello Privet'})
