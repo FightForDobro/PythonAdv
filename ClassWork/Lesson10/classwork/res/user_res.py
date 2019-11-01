@@ -1,10 +1,8 @@
 from flask_restful import Resource
 from flask import request, jsonify
 
-from ClassWork.Lesson10.classwork.models.user import Post
-from ClassWork.Lesson10.classwork.models.user import User
-from ClassWork.Lesson10.classwork.schemes.user_scheme import PostScheme
-from ClassWork.Lesson10.classwork.schemes.user_scheme import UserScheme
+from ClassWork.Lesson10.classwork.models.user import Post, User
+from ClassWork.Lesson10.classwork.schemes.user_scheme import PostScheme, UserScheme
 
 
 class UserRes(Resource):

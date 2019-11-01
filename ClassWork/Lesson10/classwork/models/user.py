@@ -1,6 +1,5 @@
 from mongoengine import *
 from datetime import datetime
-import json
 
 
 connect('blog')

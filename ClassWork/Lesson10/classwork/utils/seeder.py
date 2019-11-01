@@ -44,5 +44,3 @@ def db_spammer(amount, teg_list=None):
 
         user.create_post(**post_dict)
 
-
-db_spammer(10)
