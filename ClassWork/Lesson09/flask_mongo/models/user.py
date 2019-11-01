@@ -27,6 +27,7 @@ class User(Document):
         kwargs.update(user=self)
         Post(**kwargs).save()
 
+
 class Post(Document):
 
     title = StringField(max_length=512)

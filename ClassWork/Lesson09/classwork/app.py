@@ -3,7 +3,8 @@ from flask import (
                     render_template,
                     request
                   )
-import models.users as s_db
+from models import users as s_db
+
 
 app = Flask(__name__)
 

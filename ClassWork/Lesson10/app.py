@@ -1,4 +1,4 @@
-#TODO GETATTR SETATTR
+# TODO GETATTR SETATTR
 
 
 from flask import (Flask,
@@ -6,11 +6,10 @@ from flask import (Flask,
                    jsonify,
                    Response)
 
-
-from PythonAdv.PythonAdv.ClassWork.Lesson10.models.workers import Person
-from PythonAdv.PythonAdv.ClassWork.Lesson10.schemes.workers_scheme import PersonSchema
+from .models.workers import Person
+from .schemes.workers_scheme import PersonSchema
 from flask_restful import Api
-from PythonAdv.PythonAdv.ClassWork.Lesson10.resources.worker_resources import WorkerResources
+from .resources.worker_resources import WorkerResources
 
 app = Flask(__name__)
 api = Api(app)
