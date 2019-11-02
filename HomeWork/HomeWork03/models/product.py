@@ -3,7 +3,7 @@ from mongoengine import *
 a = connect('shop')
 
 
-class Category(EmbeddedDocument):
+class Category(Document):
 
     title = StringField(max_length=32, required=True)
     description = StringField(max_length=128)
@@ -16,7 +16,7 @@ class Product(Document):
     accessibility = BooleanField(default=True)
     amount = IntField(default=0)
     views = IntField(default=0)
-    category = EmbeddedDocumentField(Category)
+    category = ReferenceField(Category)
 
 
 # print(a.collection.aggregate({

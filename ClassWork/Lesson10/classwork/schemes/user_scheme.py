@@ -9,6 +9,7 @@ class TegScheme(Schema):
 
 class UserScheme(Schema):
 
+    id = fields.String()
     nickname = fields.String()
     name = fields.String()
     surname = fields.String()
@@ -17,6 +18,7 @@ class UserScheme(Schema):
 
 class PostScheme(Schema):
 
+    id = fields.String()
     post_title = fields.String()
     content = fields.String()
     publish_date = fields.DateTime()

@@ -24,6 +24,5 @@ class WorkerResources(Resource):
 
         return PersonSchema().dump(obj.reload())
 
-
     def delete(self):
         return jsonify(**{'mothod': 'delete'})

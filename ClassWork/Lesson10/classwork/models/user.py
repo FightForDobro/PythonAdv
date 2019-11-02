@@ -23,6 +23,11 @@ class User(Document):
         Post(**kwargs).save()
         self.update(post_count=Post.objects(author=self).count())
 
+    def delete_post(self, p_id):
+
+        Post(id=p_id).delete()
+        self.update(post_count=Post.objects(author=self).count())
+
 
 class Post(Document):
 
@@ -31,7 +36,7 @@ class Post(Document):
     publish_date = DateTimeField(default=datetime.now())
     views = IntField(default=0)
     teg = EmbeddedDocumentField(Teg)
-    author = ReferenceField(User)
+    author = ReferenceField(User, default=User.objects(nickname='ADMIN').get())
 
 
 # username = User.objects(nickname='VariousPersonality').get()
