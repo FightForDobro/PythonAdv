@@ -16,7 +16,7 @@ class Product(Document):
     accessibility = BooleanField(default=True)
     amount = IntField(default=0)
     views = IntField(default=0)
-    category = ReferenceField(Category)
+    category = ReferenceField(Category, required=True)
 
 
 # print(a.collection.aggregate({
