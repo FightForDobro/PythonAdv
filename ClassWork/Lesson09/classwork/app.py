@@ -33,9 +33,6 @@ def successful(crud_status):
 
         new_data = {k: v for k, v in new_data.items() if v}
 
-        print('----------------------------------------------------------')
-        print(new_data)
-        print('----------------------------------------------------------')
         s_db.Student().update_student(**new_data)
 
         return render_template('successful.html')

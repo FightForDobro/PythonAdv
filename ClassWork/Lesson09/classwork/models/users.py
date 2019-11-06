@@ -1,7 +1,6 @@
 from mongoengine import *
 import names
 from random import randint, choice
-from datetime import datetime
 
 connect('user_db')
 
