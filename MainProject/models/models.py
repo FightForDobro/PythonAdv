@@ -18,9 +18,9 @@ class Properties(DynamicEmbeddedDocument):
 
 class Category(Document):
 
-    title = StringField(max_length=255, required=True)
+    title = StringField(max_length=255, required=True, unique=True)
     description = StringField(max_length=512)
-    subcategory = ReferenceField('self')
+    subcategory = ListField(ReferenceField('self'))
 
     @property
     def is_parent(self):
@@ -68,3 +68,21 @@ class News(Document):
 # }
 #
 # News(**news).save()
+
+# sub_category_dict = {
+#     'title': 'PC',
+#     'description': 'Games for PC'
+# }
+#
+# category_obj = Category.objects(title='VIDEO GAMES').get()
+# # sub_category = Category(**sub_category_dict).save()
+# category_obj.add_subcategory(category_obj)
+#
+# print(category_obj.reload().subcategory)
+
+# text_dict = {
+#     'title': 'Мы открились',
+#     'body': 'Покупайте игры фильмы музыку и кино в лучшем магазине BEATLEX'
+# }
+#
+# Texts(**text_dict).save()

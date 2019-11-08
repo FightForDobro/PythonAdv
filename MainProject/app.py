@@ -6,10 +6,10 @@ from telebot.types import (
     ReplyKeyboardMarkup
 )
 
-from keyboards import ReplyKB
-import config
-import keyboards
-from models import models
+from MainProject.keyboards import ReplyKB, InlineKB
+import MainProject.config as config
+import MainProject.keyboards as keyboards
+from MainProject.models import models as db
 
 
 bot = telebot.TeleBot(config.TOKEN)
@@ -24,24 +24,35 @@ def start(message):
     bot.send_message(message.chat.id, greeting_str, reply_markup=keyboard)
 
 
-@bot.message_handler(func=lambda message: message.lower() == 'Последние новости'.lower())
+@bot.message_handler(func=lambda message: message.text == 'Последние новости')
+def news(message):
+
+    bot.send_message(message.chat.id, 'News')
+
+    for i in db.News.objects:
+
+        bot.send_message(message.chat.id, i.title)
+        bot.send_message(message.chat.id, i.content)
+
+
+@bot.message_handler(func=lambda message: message.text == 'Продукти')
+def news(message):
+
+    keyboard = InlineKB().generate_kb(*[b.title for b in db.Category.objects])
+
+    bot.send_message(message.chat.id, 'MENU', reply_markup=keyboard)
+
+
+@bot.message_handler(func=lambda message: message.text == 'Продуккти со скидкой')
 def news(message):
     pass
 
 
-@bot.message_handler(func=lambda message: message.lower() == 'Продукти'.lower())
+@bot.message_handler(func=lambda message: message.text == 'Информации о магазине')
 def news(message):
-    pass
 
-
-@bot.message_handler(func=lambda message: message.lower() == 'Продуккти со скидкой'.lower())
-def news(message):
-    pass
-
-
-@bot.message_handler(func=lambda message: message.lower() == 'Информации о магазине'.lower())
-def news(message):
-    pass
+    bot.send_message(message.chat.id, db.Texts.objects.first().title)
+    bot.send_message(message.chat.id, db.Texts.objects.first().body)
 
 
 if __name__ == '__main__':
