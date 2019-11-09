@@ -21,6 +21,11 @@ class Category(Document):
     title = StringField(max_length=255, required=True, unique=True)
     description = StringField(max_length=512)
     subcategory = ListField(ReferenceField('self'))
+    is_root = BooleanField(default=False)
+
+    @classmethod
+    def get_root_categories(cls):
+        return cls.objects(is_root=True)
 
     @property
     def is_parent(self):
@@ -31,7 +36,9 @@ class Category(Document):
         return Product.objects(category=self, **kwargs)
 
     def add_subcategory(self, obj):
+
         self.subcategory.append(obj)
+        self.save()
 
 
 class Product(Document):
@@ -75,8 +82,8 @@ class News(Document):
 # }
 #
 # category_obj = Category.objects(title='VIDEO GAMES').get()
-# # sub_category = Category(**sub_category_dict).save()
-# category_obj.add_subcategory(category_obj)
+# sub_category = Category(**sub_category_dict).save()
+# category_obj.add_subcategory(sub_category)
 #
 # print(category_obj.reload().subcategory)
 

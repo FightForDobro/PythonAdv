@@ -1,9 +1,10 @@
-from MainProject.models.models import (Category,
-                                       Product,
-                                       News)
+from models.models import (Category,
+                           Product,
+                           News)
 import lorem
 from random import choice, randint
 
+Category.objects.update(is_root=False)
 
 def category_seeder():
 
@@ -14,67 +15,11 @@ def category_seeder():
 
         category_dict = {
             'title': category,
-            'description': lorem.sentence()
+            'description': lorem.sentence(),
+            'is_root': False
         }
 
         Category(**category_dict).save()
-    #
-    # sub_categories = {'VIDEO GAMES': ['PC', 'XBOX', 'PlayStation']}
-    #
-    # for category in sub_categories:
-    #
-    #     for sub_category in category:
-    #
-    #         sub_category_dict = {
-    #             'title': sub_category,
-    #             'description': lorem.sentence()
-    #
-    #         }
-    #
-    #         sub_category = Category(**sub_category_dict).save()
-    #
-    #         Category.objects(title=category).get().add_subcategory(sub_category)
-    #
-    # categories = [{'VIDEO GAMES': [{'PC': genres},
-    #                                {'XBOX': genres},
-    #                                {'PlayStation': genres}
-    #                                ]},
-    #               {'MOVIES': genres},
-    #               'MUSIC'
-    #               ]
-    # for category in categories:
-    #     while type(category) == dict:
-    #         for sub_category in category:
-    #
-    #             if type(sub_category) == dict:
-    #                 while
-    #
-    #             sub_category_dict = {
-    #                 'title': sub_category,
-    #                 'description': lorem.sentence()
-    #                 ''
-    #             }
-    #
-    #         category_dict = {
-    #             'title': category,
-    #             'description': lorem.sentence(),
-    #             'subcategory': sub_category
-    #         }
-    # root_status = categories
-    #
-    # while True:
-    #
-    #     for category in root_status:
-    #
-    #         category_dict = {
-    #             'title': category,
-    #             'description': lorem.sentence()
-    #         }
-    #
-    #         if category == dict:
-    #
-    #
-    #         if
 
 
 def product_seeder(amount):
@@ -90,8 +35,6 @@ def product_seeder(amount):
         'MOVIE': movies_names,
         'MUSIC': music
     }
-
-
 
     for _ in range(amount):
 
@@ -122,3 +65,33 @@ def news_seeder(amount):
         }
 
         News(**news_dict).save()
+
+
+# category_seeder()
+# product_seeder(7)
+# news_seeder(8)
+
+subsub_cut_example = {
+    'title': 'Subcut of subcut',
+    'description': 'i am the lowest in the current hierarchy'
+}
+
+subsub_cut = Category(**subsub_cut_example).save()
+
+
+subcut_example = {
+    'title': 'Subcut of Root',
+    'description': 'i am subcut of Root',
+    'subcategory': [subsub_cut]
+}
+
+subcut = Category(**subcut_example).save()
+
+cat_example = {
+    'title': 'The root',
+    'description': 'Root directory',
+    'is_root': True,
+    'subcategory': [subcut]
+}
+
+Category(**cat_example).save()

@@ -48,9 +48,31 @@ class InlineKB(InlineKeyboardMarkup):
 
             k_buttons = [InlineKeyboardButton(b, callback_data=d) for d, b in kwargs.items()]
 
-            self.add(buttons + k_buttons)
+            self.add(*(buttons + k_buttons))
 
         self.add(*buttons)
 
         return self
 
+
+class InlineKBNew(InlineKeyboardMarkup):
+
+    def __init__(self, iterable, named_arg, lookup_field=id, title_field='title', row_width=3):
+        super().__init__(row_width=row_width)
+
+        self._iterable = iterable
+        self._named_arg = named_arg
+        self._lookup_field = lookup_field
+        self._title_field = title_field
+
+    def generate_kb(self):
+        buttons = []
+
+        for i in self._iterable:
+            buttons.append(InlineKeyboardButton(
+                text=getattr(i, self._title_field),
+                callback_data=f'{self._named_arg}_' + str(getattr(i, self._lookup_field))
+            ))
+
+        self.add(*buttons)
+        return self

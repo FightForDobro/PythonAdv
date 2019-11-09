@@ -6,10 +6,10 @@ from telebot.types import (
     ReplyKeyboardMarkup
 )
 
-from MainProject.keyboards import ReplyKB, InlineKB
-import MainProject.config as config
-import MainProject.keyboards as keyboards
-from MainProject.models import models as db
+from keyboards import ReplyKB, InlineKB
+import config
+import keyboards
+from models import models as db
 
 
 bot = telebot.TeleBot(config.TOKEN)
@@ -25,7 +25,7 @@ def start(message):
 
 
 @bot.message_handler(func=lambda message: message.text == 'Последние новости')
-def news(message):
+def show_news(message):
 
     bot.send_message(message.chat.id, 'News')
 
@@ -36,20 +36,64 @@ def news(message):
 
 
 @bot.message_handler(func=lambda message: message.text == 'Продукти')
-def news(message):
+def show_category(message):
 
-    keyboard = InlineKB().generate_kb(*[b.title for b in db.Category.objects])
+    keyboard = InlineKB().generate_kb(**{f'category_{d.id}': d.title for d in db.Category.get_root_categories()})
 
     bot.send_message(message.chat.id, 'MENU', reply_markup=keyboard)
 
 
+@bot.callback_query_handler(func=lambda call: call.data.split('_')[0] == 'category')
+def show_product_or_subcategory(call):
+
+    """
+
+    :param call:
+    :return: listed subcategories || listed products
+    """
+
+    obj_id = call.data.split('_')[1]
+    category = db.Category.objects(id=obj_id).get()
+
+    if category.is_parent:
+
+        keyboard = InlineKB().generate_kb(**{f'category_{d.id}': d.title for d in category.subcategory})
+        bot.edit_message_text(text=category.title, chat_id=call.message.chat.id,
+                              message_id=call.message.message_id,
+                              reply_markup=keyboard)
+
+    else:
+
+        for i in db.Product.objects(category=category):
+            keyboard = InlineKB().generate_kb(**{f'product_{d.id}': d.title for d in db.Product.objects(category=category)})
+            bot.edit_message_text(text=category.title, chat_id=call.message.chat.id,
+                                  message_id=call.message.message_id,
+                                  reply_markup=keyboard)
+
+
+@bot.callback_query_handler(func=lambda call: call.data.split('_')[0] == 'product')
+def show_product(call):
+
+    product = db.Product.objects(id=call.data.split('_')[1]).get()
+
+    keyboard = InlineKB().generate_kb(**{f'cart_{call.message.chat.id}': 'Добавить в корзину'})
+
+    bot.send_message(call.message.chat.id, f'Вы вибрали продукт {product.title} \n\n'
+                                           f'Описание: \n'
+                                           f'Здесь должно быть ваше изображение \n\n'
+                                           f'{product.description} \n\n'
+                                           f'Цена: <del>{product.price}</del>',
+                     reply_markup=keyboard,
+                     parse_mode='HTML')
+
+
 @bot.message_handler(func=lambda message: message.text == 'Продуккти со скидкой')
-def news(message):
+def show_sales_products(message):
     pass
 
 
 @bot.message_handler(func=lambda message: message.text == 'Информации о магазине')
-def news(message):
+def show_info(message):
 
     bot.send_message(message.chat.id, db.Texts.objects.first().title)
     bot.send_message(message.chat.id, db.Texts.objects.first().body)
