@@ -18,10 +18,35 @@ bot = telebot.TeleBot(config.TOKEN)
 @bot.message_handler(commands=['start'])
 def start(message):
 
-    # greetings_str = models.Texts(title='Greetings').get().body
-    greeting_str = 'Hi!'
+    if not db.User.objects(user_id=str(message.chat.id)):
+
+        db.User.create_user(str(message.chat.id), f'{message.chat.last_name} '
+                                                  f'{message.chat.first_name}',
+                                                  message.chat.username)
+
+    greeting_str = 'Добро пожаловать в виртуальный мир BEATLEX'
     keyboard = ReplyKB().generate_kb(*keyboards.beginning_kb.values())
+
     bot.send_message(message.chat.id, greeting_str, reply_markup=keyboard)
+
+
+@bot.message_handler(func=lambda message: message.text == 'Корзина')
+def show_cart(message):
+
+    user = db.User.objects(user_id=str(message.chat.id)).get()
+
+    cart_list = []
+
+    for i in db.Cart.objects(owner=user).get().all_products:
+
+        cart_list.append(f'---------------------- \n'  # FIXME Добавить лен для палочек чтобы по размеру было 
+                         f'Название: {i.title} \n'
+                         f'Цена: {i.price} \n')  # FIXME Добавить проверки на скидку
+
+    keyboard = InlineKB().generate_kb(**{f'buy_{db.Cart.objects(owner=user).get().id}': 'Купить'})
+
+    bot.send_message(message.chat.id, ''.join(cart_list),
+                     reply_markup=keyboard)
 
 
 @bot.message_handler(func=lambda message: message.text == 'Последние новости')
@@ -64,8 +89,8 @@ def show_product_or_subcategory(call):
 
     else:
 
-        for i in db.Product.objects(category=category):
-            keyboard = InlineKB().generate_kb(**{f'product_{d.id}': d.title for d in db.Product.objects(category=category)})
+        for _ in db.Product.objects(category=category):
+            keyboard = InlineKB().generate_kb(**{f'product_{d.id}': d.title for d in db.Product.objects(category=category)})  #FIXME make less code
             bot.edit_message_text(text=category.title, chat_id=call.message.chat.id,
                                   message_id=call.message.message_id,
                                   reply_markup=keyboard)
@@ -76,15 +101,30 @@ def show_product(call):
 
     product = db.Product.objects(id=call.data.split('_')[1]).get()
 
-    keyboard = InlineKB().generate_kb(**{f'cart_{call.message.chat.id}': 'Добавить в корзину'})
+    keyboard = InlineKB().generate_kb(**{f'cart_{product.id}': 'Добавить в корзину'})
 
-    bot.send_message(call.message.chat.id, f'Вы вибрали продукт {product.title} \n\n'
-                                           f'Описание: \n'
-                                           f'Здесь должно быть ваше изображение \n\n'
-                                           f'{product.description} \n\n'
-                                           f'Цена: <del>{product.price}</del>',
-                     reply_markup=keyboard,
-                     parse_mode='HTML')
+    bot.send_photo(call.message.chat.id, product.img.read(), caption=f'Вы вибрали продукт {product.title} \n\n'
+                                                                     f'Описание: \n'
+                                                                     f'{product.description} \n\n'
+                                                                     f'Цена: <b>{product.price}</b>',
+                                                                     reply_markup=keyboard,
+                                                                     parse_mode='HTML')
+
+    # bot.send_message(call.message.chat.id, f'Вы вибрали продукт {product.title} \n\n'
+    #                                        f'Описание: \n'
+    #                                        f'Здесь должно быть ваше изображение \n\n'
+    #                                        f'{product.description} \n\n'
+    #                                        f'Цена: <b>{product.price}</b>',
+    #                  reply_markup=keyboard,
+    #                  parse_mode='HTML')
+
+
+@bot.callback_query_handler(func=lambda call: call.data.split('_')[0] == 'cart')
+def add_to_cart(call):
+
+    product = db.Product.objects(id=call.data.split('_')[1]).get()
+    user = db.User.objects(user_id=str(call.message.chat.id)).get()
+    user.update_cart(product)
 
 
 @bot.message_handler(func=lambda message: message.text == 'Продуккти со скидкой')

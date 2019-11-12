@@ -50,6 +50,7 @@ class Product(Document):
     is_discount = BooleanField(default=False)
     properties = EmbeddedDocumentField(Properties)
     category = ReferenceField(Category)
+    img = FileField()
 
     @property
     def get_price(self):
@@ -61,12 +62,60 @@ class Product(Document):
     def get_discount_product(cls, **kwargs):
         cls.objects(is_discount=True, **kwargs)
 
+    def add_img(self, img):
+        self.img.put(img, content_type='image/jpg')
+        self.save()
+
 
 class News(Document):
 
     title = StringField(max_length=32)
     content = StringField(max_length=256)
     date = DateTimeField(default=datetime.now())
+
+
+class Cart(Document):
+
+    all_products = ListField(ReferenceField(Product))
+    all_products_price = IntField(default=0)
+    owner = ReferenceField('User')
+
+
+class User(Document):
+    
+    user_id = StringField()
+    fullname = StringField()
+    nickname = StringField()
+    phone = StringField()
+
+    @classmethod
+    def create_user(cls, user_id, fullname, nickname, phone=None):
+
+        user_dict = {
+            'user_id': user_id,
+            'fullname': fullname,
+            'nickname': nickname,
+            'phone': phone
+        }
+
+        cls(**user_dict).save().create_cart()
+
+    def create_cart(self):
+
+        cart_obj = {
+            'all_products': [],
+            'owner': self
+        }
+
+        Cart(**cart_obj).save()
+
+    def update_cart(self, obj):
+
+        cart = Cart.objects(owner=self).get()
+
+        cart.all_products.append(obj)
+
+        cart.save()
 
 
 # news = {
@@ -93,3 +142,10 @@ class News(Document):
 # }
 #
 # Texts(**text_dict).save()
+
+# with open('/home/ffd/Downloads/PythonAdv/MainProject/img/default.png', 'rb') as f:
+#     Product.objects(id='5dc6fae38ea970b380eff0cf').get().add_img(f)
+
+
+# test = User.objects(user_id='157301757')
+# print(test)
