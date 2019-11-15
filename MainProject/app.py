@@ -11,27 +11,27 @@ import config
 import keyboards
 from models import models as db
 
-from utils.scripts import strike
+from utils.scripts import strike, get_price
 
-from flask import Flask, request, abort
-
-app = Flask(__name__)
+# from flask import Flask, request, abort
+#
+# app = Flask(__name__)
 bot = telebot.TeleBot(config.TOKEN)
 
 
-# Process webhook calls
-@app.route(config.HANDEL_URL, methods=['POST'])
-def webhook():
-
-    if request.headers.get('content-type') == 'application/json':
-
-        json_string = request.get_data().decode('utf-8')
-        update = telebot.types.Update.de_json(json_string)
-        bot.process_new_updates([update])
-        return ''
-
-    else:
-        abort(403)
+# # Process webhook calls
+# @app.route(config.HANDEL_URL, methods=['POST'])
+# def webhook():
+#
+#     if request.headers.get('content-type') == 'application/json':
+#
+#         json_string = request.get_data().decode('utf-8')
+#         update = telebot.types.Update.de_json(json_string)
+#         bot.process_new_updates([update])
+#         return ''
+#
+#     else:
+#         abort(403)
 
 
 @bot.message_handler(commands=['start'])
@@ -54,27 +54,50 @@ def show_cart(message):
 
     user = db.User.objects(user_id=str(message.chat.id)).get()
 
-    cart_list = []
+    # keyboard = InlineKeyboardMarkup(row_width=2)
 
+    # cart_list = []
+    #
     cart = db.Cart.objects(owner=user).get()
+    #
+    # price = 0
 
-    price = 0
+    # for i in cart.all_products:
+    #
+    #     keyboard.add(InlineKeyboardButton(f'{i.title} {get_price()}'))
 
-    for i in cart.all_products:
+        # if i.is_discount:
+        #     i.price = i.new_price
+        #
+        # cart_list.append(f'---------------------- \n'  # FIXME Добавить лен для палочек чтобы по размеру было
+        #                  f'Название: {i.title} \n'
+        #                  f'Цена: {i.price} \n')  # FIXME Добавить проверки на скидку
+        #
+        # price += i.price
 
-        if i.is_discount:
-            i.price = i.new_price
 
-        cart_list.append(f'---------------------- \n'  # FIXME Добавить лен для палочек чтобы по размеру было 
-                         f'Название: {i.title} \n'
-                         f'Цена: {i.price} \n')  # FIXME Добавить проверки на скидку
 
-        price += i.price
+    # keyboard = InlineKB().generate_kb(**{f'buy_{cart.id}_{price}': f'Купить: {price}'})  # FIXME Поулчать адекватно цену
 
-    keyboard = InlineKB().generate_kb(**{f'buy_{cart.id}_{price}': f'Купить: {price}'})  # FIXME Поулчать адекватно цену
+    bot.send_message(message.chat.id, 'CART',
+                     reply_markup=InlineKB().generate_cart_kb(cart))
 
-    bot.send_message(message.chat.id, ''.join(cart_list),
-                     reply_markup=keyboard)
+
+@bot.callback_query_handler(func=lambda call: call.data.split('_')[0] == 'del')
+def delete_product_from_cart(call):  # TODO Добавить x1 к продуктам
+
+    print(call.message.chat.id)
+    print(call.data.split('_')[1])
+    user = db.User.objects(user_id=str(call.message.chat.id)).get()
+    cart = db.Cart.objects(owner=user).get()
+    product = db.Product.objects(id=call.data.split('_')[1]).get()
+
+    cart.update(pull__all_products=product.id)
+
+    bot.edit_message_text(chat_id=call.message.chat.id,
+                          text='CART',
+                          message_id=call.message.message_id,
+                          reply_markup=InlineKB().generate_cart_kb(db.Cart.objects(owner=user).get()))
 
 
 @bot.callback_query_handler(func=lambda call: call.data.split('_')[0] == 'buy')
@@ -232,8 +255,10 @@ def show_info(message):
 
 
 if __name__ == '__main__':
-    import time
-    bot.remove_webhook()
-    time.sleep(1)
-    bot.set_webhook(config.WEBHOOK_URL)
-    app.run(debug=True)
+    # import time
+    # bot.remove_webhook()
+    # time.sleep(1)
+    # bot.set_webhook(config.WEBHOOK_URL)
+    # app.run(debug=True)
+
+    bot.polling(none_stop=True)

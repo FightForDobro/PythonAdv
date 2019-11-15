@@ -1,4 +1,5 @@
 import models.models as db
+from utils.scripts import get_price, get_cart_price
 
 beginning_kb = {
     'news': 'Последние новости',
@@ -65,6 +66,35 @@ class InlineKB(InlineKeyboardMarkup):
     def generate_root_kb(self):
 
         self.generate_kb()
+
+    def generate_cart_kb(self, cart):
+
+        cross_icon = u'\u274C'  # Значок -- красный крестик
+
+        # Базовые кнопки сверху
+
+        templates = ['Название', 'Цена', 'Удалить']
+        buttons = [(InlineKeyboardButton(str(b), callback_data=f'help_{b}')) for b in templates]
+        self.add(*buttons)
+
+        # ----------------------------------------------------------------------------
+
+        # Генератор кнопок для корзины
+        for p in cart.all_products:
+
+            current_price = get_price(p)
+            self.add(InlineKeyboardButton(text=p.title,
+                                          callback_data=f'product_{p.id}'),
+                     InlineKeyboardButton(text=current_price[0],
+                                          callback_data=f'old_{current_price[1]}'),
+                     InlineKeyboardButton(text=cross_icon,
+                                          callback_data=f'del_{p.id}'))
+
+        self.add(InlineKeyboardButton(text=f'Цена корзины: {get_cart_price(cart)}', callback_data='full_price'))
+        self.add(InlineKeyboardButton(text='Купить', callback_data=f'buy_{cart.id}'))
+
+        return self
+        # --------------------------------------------------------------------------
 
 
 # class InlineKBNew(InlineKeyboardMarkup):
