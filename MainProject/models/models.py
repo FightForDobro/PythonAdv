@@ -83,7 +83,6 @@ class News(Document):
 class Cart(Document):
 
     all_products = ListField(ReferenceField(Product))
-    all_products_price = IntField(default=0)
     owner = ReferenceField('User')
 
 

@@ -54,20 +54,22 @@ def show_cart(message):
 
         price += i.price
 
-    keyboard = InlineKB().generate_kb(**{f'buy_{cart.id}_{price}': f'Купить: {price}'})
+    keyboard = InlineKB().generate_kb(**{f'buy_{cart.id}_{price}': f'Купить: {price}'})  # FIXME Поулчать адекватно цену
 
     bot.send_message(message.chat.id, ''.join(cart_list),
                      reply_markup=keyboard)
 
 
 @bot.callback_query_handler(func=lambda call: call.data.split('_')[0] == 'buy')
-def buy_cart(call):  # FIXME Перенести в скрипиться подомать над выводом в листе
+def buy_cart(call):  # FIXME Перенести в скрипиться подумать над выводом в листе
 
     cart = db.Cart.objects(id=call.data.split('_')[1]).get()
 
     db.OrderHistory(**{'cart': cart.all_products,
                        'full_price': call.data.split('_')[2],
                        'owner': cart.owner}).save()
+
+    cart.all_products = []
 
     bot.send_message(call.message.chat.id, 'Спасибо за покупку :)')
 
@@ -184,7 +186,8 @@ def go_back(call):
 
 @bot.callback_query_handler(func=lambda call: call.data.split('_')[0] == 'cart')
 def add_to_cart(call):
-
+    # user = db.User.objects(id=call.data.)
+    # if not db.Cart.objects(owner=)
     product = db.Product.objects(id=call.data.split('_')[1]).get()
     user = db.User.objects(user_id=str(call.message.chat.id)).get()
     user.update_cart(product)
