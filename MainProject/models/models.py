@@ -46,6 +46,7 @@ class Category(Document):
         self.subcategory.append(obj)
         self.save()
 
+
 class Product(Document):
 
     title = StringField(max_length=255)
@@ -65,7 +66,7 @@ class Product(Document):
 
     @classmethod
     def get_discount_product(cls, **kwargs):
-        cls.objects(is_discount=True, **kwargs)
+        return cls.objects(is_discount=True, **kwargs)
 
     def add_img(self, img):
         self.img.put(img, content_type='image/jpg')
@@ -121,6 +122,18 @@ class User(Document):
         cart.all_products.append(obj)
 
         cart.save()
+
+
+class OrderHistory(Document):
+
+    cart = ListField()
+    full_price = IntField()
+    owner = ReferenceField(User)
+    status = StringField(default='В обработке')
+
+
+
+
 
 
 # news = {

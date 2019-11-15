@@ -28,35 +28,35 @@
 #
 #     return category_dict
 
-class Test:
-
-    def __init__(self):
-        self._root_route = []
-
-    def category_digger(self, categories):
-
-        if type(categories) is list:
-
-            for i in categories:
-
-                if type(i) is dict:
-
-                    for k, v in i.items():
-
-                        self._root_route.append(k)
-                        return self.category_digger(v)
-
-                elif type(i) is str:
-                    print(i)
-
-        elif type(categories) is dict:
-
-            for k, v in categories.items():
-                self._root_route.append(k)
-                return self.category_digger(v)
-
-        elif type(categories) is str:
-            print(categories)
+# class Test:
+#
+#     def __init__(self):
+#         self._root_route = []
+#
+#     def category_digger(self, categories):
+#
+#         if type(categories) is list:
+#
+#             for i in categories:
+#
+#                 if type(i) is dict:
+#
+#                     for k, v in i.items():
+#
+#                         self._root_route.append(k)
+#                         return self.category_digger(v)
+#
+#                 elif type(i) is str:
+#                     print(i)
+#
+#         elif type(categories) is dict:
+#
+#             for k, v in categories.items():
+#                 self._root_route.append(k)
+#                 return self.category_digger(v)
+#
+#         elif type(categories) is str:
+#             print(categories)
 
     # for root_category in test_dict:
     #     for sub_category in test_dict[root_category]:
@@ -76,26 +76,26 @@ class Test:
 # test['a'] = 'b'
 # print(test)
 
-test_dict = {
-    'root_c': [
-
-        {
-            'PC': [
-                {'Steam': ['Action', 'RPG', 'Strategy']},
-                {'EpicGame': ['Battle Royal', 'Horror', 'Fight']},
-                {'Uplay': 'Parkour'}
-            ]
-        },
-
-        {
-            'Xbox': ['Action', 'RPG', 'Strategy']
-        },
-
-        {
-            'PlayStation': ['Action', 'RPG', 'Strategy']
-        }
-    ]
-}
+# test_dict = {
+#     'root_c': [
+#
+#         {
+#             'PC': [
+#                 {'Steam': ['Action', 'RPG', 'Strategy']},
+#                 {'EpicGame': ['Battle Royal', 'Horror', 'Fight']},
+#                 {'Uplay': 'Parkour'}
+#             ]
+#         },
+#
+#         {
+#             'Xbox': ['Action', 'RPG', 'Strategy']
+#         },
+#
+#         {
+#             'PlayStation': ['Action', 'RPG', 'Strategy']
+#         }
+#     ]
+# }
 
 
 # for root_t, root_v in test_dict.items():
@@ -114,4 +114,5 @@ test_dict = {
 # for i in test_dict:
 #     category_digger(test_dict[i])
 
-Test().category_digger(test_dict)
+# Test().category_digger(test_dict)
+

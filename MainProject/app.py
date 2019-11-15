@@ -11,6 +11,8 @@ import config
 import keyboards
 from models import models as db
 
+from utils.scripts import strike
+
 
 bot = telebot.TeleBot(config.TOKEN)
 
@@ -37,16 +39,37 @@ def show_cart(message):
 
     cart_list = []
 
-    for i in db.Cart.objects(owner=user).get().all_products:
+    cart = db.Cart.objects(owner=user).get()
+
+    price = 0
+
+    for i in cart.all_products:
+
+        if i.is_discount:
+            i.price = i.new_price
 
         cart_list.append(f'---------------------- \n'  # FIXME Добавить лен для палочек чтобы по размеру было 
                          f'Название: {i.title} \n'
                          f'Цена: {i.price} \n')  # FIXME Добавить проверки на скидку
 
-    keyboard = InlineKB().generate_kb(**{f'buy_{db.Cart.objects(owner=user).get().id}': 'Купить'})
+        price += i.price
+
+    keyboard = InlineKB().generate_kb(**{f'buy_{cart.id}_{price}': f'Купить: {price}'})
 
     bot.send_message(message.chat.id, ''.join(cart_list),
                      reply_markup=keyboard)
+
+
+@bot.callback_query_handler(func=lambda call: call.data.split('_')[0] == 'buy')
+def buy_cart(call):  # FIXME Перенести в скрипиться подомать над выводом в листе
+
+    cart = db.Cart.objects(id=call.data.split('_')[1]).get()
+
+    db.OrderHistory(**{'cart': cart.all_products,
+                       'full_price': call.data.split('_')[2],
+                       'owner': cart.owner}).save()
+
+    bot.send_message(call.message.chat.id, 'Спасибо за покупку :)')
 
 
 @bot.message_handler(func=lambda message: message.text == 'Последние новости')
@@ -92,9 +115,9 @@ def show_product_or_subcategory(call):
 
     else:
 
-        for _ in db.Product.objects(category=category):
+        for _ in db.Product.objects(category=category):  # FIXME Проверить как работает код
             keyboard = InlineKB().generate_kb(
-                **{f'product_{d.id}': d.title for d in db.Product.objects(category=category)})  #FIXME make less code
+                **{f'product_{d.id}': d.title for d in db.Product.objects(category=category)})  # FIXME make less code
 
             keyboard.add(InlineKeyboardButton(text=f'<< {category.title}', callback_data=f'back_{category.id}'))
 
@@ -110,12 +133,22 @@ def show_product(call):
 
     keyboard = InlineKB().generate_kb(**{f'cart_{product.id}': 'Добавить в корзину'})
 
-    bot.send_photo(call.message.chat.id, product.img.read(), caption=f'Вы вибрали продукт {product.title} \n\n'
-                                                                     f'Описание: \n'
-                                                                     f'{product.description} \n\n'
-                                                                     f'Цена: <b>{product.price}</b>',
-                                                                     reply_markup=keyboard,
-                                                                     parse_mode='HTML')
+    if product.is_discount:
+        bot.send_photo(call.message.chat.id, product.img.read(), caption=f'Вы вибрали продукт {product.title} \n\n'
+                                                                         f'Описание: \n'
+                                                                         f'{product.description} \n\n'
+                                                                         f'Цена: {strike(str(product.price))} '
+                                                                         f'{product.new_price}',
+                                                                         reply_markup=keyboard,
+                                                                         parse_mode='HTML')
+
+    else:
+        bot.send_photo(call.message.chat.id, product.img.read(), caption=f'Вы вибрали продукт {product.title} \n\n'
+                                                                         f'Описание: \n'
+                                                                         f'{product.description} \n\n'
+                                                                         f'Цена: <b>{product.price}</b>',
+                                                                         reply_markup=keyboard,
+                                                                         parse_mode='HTML')
 
     # bot.send_message(call.message.chat.id, f'Вы вибрали продукт {product.title} \n\n'
     #                                        f'Описание: \n'
@@ -159,7 +192,16 @@ def add_to_cart(call):
 
 @bot.message_handler(func=lambda message: message.text == 'Продуккти со скидкой')
 def show_sales_products(message):
-    pass
+
+    products = db.Product.get_discount_product()
+
+    keyboard = InlineKB().generate_kb(
+        **{f'product_{d.id}': d.title for d in products})  # FIXME make less code
+
+        # keyboard.add(InlineKeyboardButton(text=f'<< ', callback_data=f'back_{category.id}'))
+
+    bot.send_message(text='%%% Скидки %%%', chat_id=message.chat.id,
+                          reply_markup=keyboard)
 
 
 @bot.message_handler(func=lambda message: message.text == 'Информации о магазине')
