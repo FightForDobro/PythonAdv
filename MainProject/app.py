@@ -236,3 +236,4 @@ if __name__ == '__main__':
     bot.remove_webhook()
     time.sleep(1)
     bot.set_webhook(config.WEBHOOK_URL)
+    app.run(debug=True)
