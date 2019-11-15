@@ -23,8 +23,7 @@ def category_seeder():
 
         category_dict = {
             'title': category,
-            'description': lorem.sentence(),
-            'is_root': True
+            'description': lorem.sentence()
         }
 
         Category(**category_dict).save()
@@ -74,14 +73,13 @@ def product_seeder(amount):
 
         }
 
-        default_img = open('/home/ffd/Downloads/PythonAdv/MainProject/img/default.png', 'rb')
+        default_img = open('../img/default.png', 'rb')  # FIXME Сделать так чтобы одна фотка была для всех добавить проверку к NONE и не хранить картинку
 
         product = Product(**product_dict)
         product.img.put(default_img, content_type='image/png/')
         product.save()
 
         default_img.close()
-
 
 
 def news_seeder(amount):
@@ -129,3 +127,16 @@ def news_seeder(amount):
 # category_seeder()
 # product_seeder(7)
 # news_seeder(8)
+
+# sub_category = {
+#     'title': 'Action',
+#     'description': lorem.sentence()
+# }
+#
+# subsub_c = Category(**sub_category).save()
+#
+# main_c = Category.objects(id='5dcaea230b4d808252303539').get().add_subcategory(subsub_c)
+
+
+
+

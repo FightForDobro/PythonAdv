@@ -1,6 +1,6 @@
 import re
 import time
-
+import shelve
 
 class Client:
     """
@@ -13,7 +13,7 @@ class Client:
     @classmethod
     def validate(cls, user_data: dict):
         """
-        Function validate all user input
+        Function user_input_validator all user input
         :param user_data: User data
         :return: False or user data
         """
@@ -132,7 +132,7 @@ class Client:
 
         def user_validate(self):
             """
-            Function validate user for auth
+            Function user_input_validator user for auth
             """
 
             if self._login in Client.DATABASE:

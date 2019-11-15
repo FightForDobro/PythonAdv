@@ -83,6 +83,9 @@ def show_product_or_subcategory(call):
     if category.is_parent:
 
         keyboard = InlineKB().generate_kb(**{f'category_{d.id}': d.title for d in category.subcategory})
+
+        keyboard.add(InlineKeyboardButton(text=f'<< {category.title}', callback_data=f'back_{category.id}'))
+
         bot.edit_message_text(text=category.title, chat_id=call.message.chat.id,
                               message_id=call.message.message_id,
                               reply_markup=keyboard)
@@ -90,7 +93,11 @@ def show_product_or_subcategory(call):
     else:
 
         for _ in db.Product.objects(category=category):
-            keyboard = InlineKB().generate_kb(**{f'product_{d.id}': d.title for d in db.Product.objects(category=category)})  #FIXME make less code
+            keyboard = InlineKB().generate_kb(
+                **{f'product_{d.id}': d.title for d in db.Product.objects(category=category)})  #FIXME make less code
+
+            keyboard.add(InlineKeyboardButton(text=f'<< {category.title}', callback_data=f'back_{category.id}'))
+
             bot.edit_message_text(text=category.title, chat_id=call.message.chat.id,
                                   message_id=call.message.message_id,
                                   reply_markup=keyboard)
@@ -117,6 +124,29 @@ def show_product(call):
     #                                        f'Цена: <b>{product.price}</b>',
     #                  reply_markup=keyboard,
     #                  parse_mode='HTML')
+
+
+@bot.callback_query_handler(func=lambda call: call.data.split('_')[0] == 'back')
+def go_back(call):
+
+    obj_id = call.data.split('_')[1]
+    category = db.Category.objects(id=obj_id).get()
+
+    if category.is_root:
+
+        keyboard = InlineKB().generate_kb(**{f'category_{d.id}': d.title for d in db.Category.get_root_categories()})  # FIXME Исправить как ан уроке
+
+    else:
+
+        keyboard = InlineKB().generate_kb(**{f'category_{d.id}': d.title for d in category.parent.subcategory})
+
+        keyboard.add(InlineKeyboardButton(text=f'<< {category.parent.title}',
+                                          callback_data=f'back_{category.parent.id}'))
+
+    text = 'Категории' if not category.parent else category.parent.title
+    bot.edit_message_text(text=text, chat_id=call.message.chat.id,
+                          message_id=call.message.message_id,
+                          reply_markup=keyboard)
 
 
 @bot.callback_query_handler(func=lambda call: call.data.split('_')[0] == 'cart')

@@ -1,3 +1,5 @@
+import models.models as db
+
 beginning_kb = {
     'news': 'Последние новости',
     'products': 'Продукти',
@@ -34,10 +36,15 @@ class ReplyKB(ReplyKeyboardMarkup):
 
 class InlineKB(InlineKeyboardMarkup):
 
-    def __init__(self, row_width=3):
-        super().__init__(row_width=row_width)
+    queries = {
+        'root': db.Category.get_root_categories()
+    }
 
-    def generate_kb(self, *args, **kwargs):
+    def __init__(self, row_width=3, key=None):
+        super().__init__(row_width=row_width)
+        self._query = self.queries.get(key)
+
+    def generate_kb(self, *args, **kwargs):  # FIXME Можно доавить сюда ключ
         """
         :param args: Buttons names
         :param kwargs: Button names with specific callback_data
@@ -54,6 +61,10 @@ class InlineKB(InlineKeyboardMarkup):
         self.add(*buttons)
 
         return self
+
+    def generate_root_kb(self):
+
+        self.generate_kb()
 
 
 # class InlineKBNew(InlineKeyboardMarkup):
