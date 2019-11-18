@@ -1,9 +1,6 @@
 import telebot
 from telebot.types import (
-    InlineKeyboardMarkup,
     InlineKeyboardButton,
-    KeyboardButton,
-    ReplyKeyboardMarkup
 )
 
 from keyboards import ReplyKB, InlineKB
@@ -67,7 +64,8 @@ def popup_cart_help(call):
         'Цена': 'Нажмите на цену чтобы вывести старую цену продукта',
         'Удалить': 'Нажмите на красный знакчок чтобы удалить товар с корзины',
         'cart': 'Это общая цена всех товаров в корзине',  # TODO Попробовать добавить общую цену без скидок
-        'product': 'Здесь указано ваще текущее положение нажимайте кнопки < или > для перемещения'
+        'product': 'Здесь указано ваще текущее положение нажимайте кнопки < или > для перемещения',
+        'empty': 'Здесь нет товара'
     }
 
     bot.answer_callback_query(callback_query_id=call.id,
@@ -281,9 +279,9 @@ def show_sales_products(message):
     products = db.Product.get_discount_product()
 
     keyboard = InlineKB().generate_kb(
-        **{f'product_{d.id}': d.title for d in products})  # FIXME make less code
+        **{f'product_{d.id}': d.title for d in products})  # TODO Добавить кнопку назад
 
-    bot.send_message(text='%%% Скидки %%%', chat_id=message.chat.id,
+    bot.send_message(text='Скидки', chat_id=message.chat.id,
                           reply_markup=keyboard)
 
 
@@ -301,4 +299,3 @@ if __name__ == '__main__':
     # bot.set_webhook(config.WEBHOOK_URL)
     bot.polling(none_stop=True)
     # app.run(debug=True)
-

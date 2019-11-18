@@ -31,7 +31,15 @@ def get_cart_price(cart):
 
     for i in cart.all_products:
 
-        price += i.price
+        if i.is_discount:
+            price += i.new_price
+
+        elif not i.is_discount:
+            price += i.price
+
+        else:
+            print(f'Error no such price or product\n'
+                  f'Product id: {i.id}')
 
     return price
 

@@ -129,12 +129,11 @@ class InlineKB(InlineKeyboardMarkup):
                                                         callback_data=f'product_{p.id}'))
                     counter[str(user_id)] += 1
 
-                if len(products) % 6 > 0 and len(products) % 6 >= len(*self.keyboard):  # FIXME Исправить тут жолжно быть количество кнпоок
+                if 6 > len(products[db.UserMenuCounter.objects(owner=user).get().counter::]) > i:
 
-                    for _ in range(len(products) % 6):
+                    for _ in range(6 - len(products[db.UserMenuCounter.objects(owner=user).get().counter::])):
                         buttons.append(InlineKeyboardButton(text=' ', callback_data=f'help_empty'))
                         counter[str(user_id)] += 1
-                    break
 
                 if counter[str(user_id)] == db.UserMenuCounter.objects(owner=user).get().counter + 6:
 
