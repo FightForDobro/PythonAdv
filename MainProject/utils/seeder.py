@@ -52,9 +52,9 @@ def product_seeder(amount):
     music = ['AppleMusic subscribe']
 
     p_dict = {
-        'PC': games_names,
-        'MOVIE': movies_names,
-        'MUSIC': music
+        'Action': games_names,
+        # 'MOVIE': movies_names,
+        # 'MUSIC': music
     }
 
     for _ in range(amount):
@@ -125,7 +125,7 @@ def news_seeder(amount):
 
 
 # category_seeder()
-# product_seeder(7)
+product_seeder(1)
 # news_seeder(8)
 
 # sub_category = {
@@ -135,7 +135,7 @@ def news_seeder(amount):
 #
 # subsub_c = Category(**sub_category).save()
 #
-# main_c = Category.objects(id='5dcaea230b4d808252303539').get().add_subcategory(subsub_c)
+# main_c = Category.objects(id='5dcfe322f13e1638a59825a9').get().add_subcategory(subsub_c)
 
 
 

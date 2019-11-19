@@ -21,7 +21,6 @@ class Category(Document):
     title = StringField(max_length=255, required=True, unique=True)
     description = StringField(max_length=512)
     subcategory = ListField(ReferenceField('self'))
-    # is_root = BooleanField(default=False)
     parent = ReferenceField('self')
 
     @classmethod
@@ -123,11 +122,18 @@ class User(Document):
         cart.save()
 
 
+class UserMenuCounter(Document):
+
+    owner = ReferenceField(User)
+    counter = IntField(default=4)
+
+
 class OrderHistory(Document):
 
     cart = ListField()
     full_price = IntField()
     owner = ReferenceField(User)
+    datetime = DateField(default=datetime.now())
     status = StringField(default='В обработке')
 
 
@@ -166,3 +172,10 @@ class OrderHistory(Document):
 
 # test = User.objects(user_id='157301757')
 # print(test)
+
+
+# Texts(**{
+#     'title': 'BEATLEX твой гид в мире видеоигр',
+#     'body': 'Добро пожаловать у нас ты найдешь самые лучше товары в сети'
+# }).save()
+

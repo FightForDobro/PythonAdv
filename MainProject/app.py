@@ -1,9 +1,6 @@
 import telebot
 from telebot.types import (
-    InlineKeyboardMarkup,
     InlineKeyboardButton,
-    KeyboardButton,
-    ReplyKeyboardMarkup
 )
 
 from keyboards import ReplyKB, InlineKB
@@ -11,7 +8,7 @@ import config
 import keyboards
 from models import models as db
 
-from utils.scripts import strike
+from utils.scripts import strike, get_cart_price
 
 from flask import Flask, request, abort
 
@@ -19,19 +16,19 @@ app = Flask(__name__)
 bot = telebot.TeleBot(config.TOKEN)
 
 
-# Process webhook calls
-@app.route(config.HANDEL_URL, methods=['POST'])
-def webhook():
-
-    if request.headers.get('content-type') == 'application/json':
-
-        json_string = request.get_data().decode('utf-8')
-        update = telebot.types.Update.de_json(json_string)
-        bot.process_new_updates([update])
-        return ''
-
-    else:
-        abort(403)
+# # Process webhook calls
+# @app.route(config.HANDEL_URL, methods=['POST'])
+# def webhook():
+#
+#     if request.headers.get('content-type') == 'application/json':
+#
+#         json_string = request.get_data().decode('utf-8')
+#         update = telebot.types.Update.de_json(json_string)
+#         bot.process_new_updates([update])
+#         return ''
+#
+#     else:
+#         abort(403)
 
 
 @bot.message_handler(commands=['start'])
@@ -50,31 +47,54 @@ def start(message):
 
 
 @bot.message_handler(func=lambda message: message.text == 'Корзина')
-def show_cart(message):
+def show_cart(message):  # TODO Добавить возможнсоти пользователю смотреть историю покупок
 
     user = db.User.objects(user_id=str(message.chat.id)).get()
-
-    cart_list = []
-
     cart = db.Cart.objects(owner=user).get()
 
-    price = 0
+    bot.send_message(message.chat.id, 'CART',
+                     reply_markup=InlineKB().generate_cart_kb(cart))
 
-    for i in cart.all_products:
 
-        if i.is_discount:
-            i.price = i.new_price
+@bot.callback_query_handler(func=lambda call: call.data.split('_')[0] == 'help')
+def popup_cart_help(call):
 
-        cart_list.append(f'---------------------- \n'  # FIXME Добавить лен для палочек чтобы по размеру было 
-                         f'Название: {i.title} \n'
-                         f'Цена: {i.price} \n')  # FIXME Добавить проверки на скидку
+    definition_help = {
+        'Название': 'Нажмите на названия чтобы вывести карту продукта',
+        'Цена': 'Нажмите на цену чтобы вывести старую цену продукта',
+        'Удалить': 'Нажмите на красный знакчок чтобы удалить товар с корзины',
+        'cart': 'Это общая цена всех товаров в корзине',  # TODO Попробовать добавить общую цену без скидок
+        'product': 'Здесь указано ваще текущее положение нажимайте кнопки < или > для перемещения',
+        'empty': 'Здесь нет товара'
+    }
 
-        price += i.price
+    bot.answer_callback_query(callback_query_id=call.id,
+                              show_alert=True,
+                              text=f'HELP:\n'
+                                   f'{definition_help[call.data.split("_")[1]]}')
 
-    keyboard = InlineKB().generate_kb(**{f'buy_{cart.id}_{price}': f'Купить: {price}'})  # FIXME Поулчать адекватно цену
 
-    bot.send_message(message.chat.id, ''.join(cart_list),
-                     reply_markup=keyboard)
+@bot.callback_query_handler(func=lambda call: call.data.split('_')[0] == 'del')
+def delete_product_from_cart(call):  # TODO Добавить x1 к продуктам
+
+    user = db.User.objects(user_id=str(call.message.chat.id)).get()
+    cart = db.Cart.objects(owner=user).get()
+    product = db.Product.objects(id=call.data.split('_')[1]).get()
+
+    cart.update(pull__all_products=product.id)
+
+    bot.edit_message_text(chat_id=call.message.chat.id,
+                          text='CART',
+                          message_id=call.message.message_id,
+                          reply_markup=InlineKB().generate_cart_kb(db.Cart.objects(owner=user).get()))
+
+
+@bot.callback_query_handler(func=lambda call: call.data.split('_')[0] == 'old')
+def popup_old_price(call):
+
+    bot.answer_callback_query(callback_query_id=call.id,
+                              show_alert=True,
+                              text=f'Цена без скидки {call.data.split("_")[1]}')
 
 
 @bot.callback_query_handler(func=lambda call: call.data.split('_')[0] == 'buy')
@@ -83,10 +103,10 @@ def buy_cart(call):  # FIXME Перенести в скрипиться поду
     cart = db.Cart.objects(id=call.data.split('_')[1]).get()
 
     db.OrderHistory(**{'cart': cart.all_products,
-                       'full_price': call.data.split('_')[2],
+                       'full_price': get_cart_price(cart),
                        'owner': cart.owner}).save()
 
-    cart.all_products = []
+    cart.update(set__all_products=[])
 
     bot.send_message(call.message.chat.id, 'Спасибо за покупку :)')
 
@@ -121,6 +141,9 @@ def show_product_or_subcategory(call):
 
     obj_id = call.data.split('_')[1]
     category = db.Category.objects(id=obj_id).get()
+    user = db.User.objects(user_id=str(call.message.chat.id)).get()
+
+    db.UserMenuCounter.objects(owner=user).update(counter=0)
 
     if category.is_parent:
 
@@ -134,25 +157,29 @@ def show_product_or_subcategory(call):
 
     else:
 
-        for _ in db.Product.objects(category=category):  # FIXME Проверить как работает код
-            keyboard = InlineKB().generate_kb(
-                **{f'product_{d.id}': d.title for d in db.Product.objects(category=category)})  # FIXME make less code
+        print(' ----------------------------------------- TEST ----------------------------------------- ')
 
-            keyboard.add(InlineKeyboardButton(text=f'<< {category.title}', callback_data=f'back_{category.id}'))
+        # FIXME Проверить как работает код
+        print(len(db.Product.objects(category=category)))
+        print(db.Product.objects(category=category))
 
-            bot.edit_message_text(text=category.title, chat_id=call.message.chat.id,
-                                  message_id=call.message.message_id,
-                                  reply_markup=keyboard)
+        keyboard = InlineKB().generate_products_buttons(call.message.chat.id, category)
+
+        bot.edit_message_text(text=category.title, chat_id=call.message.chat.id,
+                              message_id=call.message.message_id,
+                              reply_markup=keyboard)
 
 
 @bot.callback_query_handler(func=lambda call: call.data.split('_')[0] == 'product')
 def show_product(call):
 
     product = db.Product.objects(id=call.data.split('_')[1]).get()
-
+    category = product.category
     keyboard = InlineKB().generate_kb(**{f'cart_{product.id}': 'Добавить в корзину'})
 
-    if product.is_discount:
+    keyboard.add(InlineKeyboardButton(text=f'<< {category.title}', callback_data=f'back_{category.id}'))
+
+    if product.is_discount:  # FIXME Убрать два условия используя функцию скриптах
         bot.send_photo(call.message.chat.id, product.img.read(), caption=f'Вы вибрали продукт {product.title} \n\n'
                                                                          f'Описание: \n'
                                                                          f'{product.description} \n\n'
@@ -169,13 +196,42 @@ def show_product(call):
                                                                          reply_markup=keyboard,
                                                                          parse_mode='HTML')
 
-    # bot.send_message(call.message.chat.id, f'Вы вибрали продукт {product.title} \n\n'
-    #                                        f'Описание: \n'
-    #                                        f'Здесь должно быть ваше изображение \n\n'
-    #                                        f'{product.description} \n\n'
-    #                                        f'Цена: <b>{product.price}</b>',
-    #                  reply_markup=keyboard,
-    #                  parse_mode='HTML')
+
+@bot.callback_query_handler(func=lambda call: call.data.split('_')[0] in ['sback', 'forward'])
+def swipe(call):
+
+    user = db.User.objects(user_id=str(call.message.chat.id)).get()
+    category = db.Category.objects(title=call.data.split('_')[2]).get()
+
+    if call.data.split('_')[0] == 'sback':
+
+        if db.UserMenuCounter.objects(owner=user).get().counter - 6 == 0:
+
+            bot.answer_callback_query(callback_query_id=call.id,
+                                      show_alert=True,
+                                      text='ОШИБКА: \n'
+                                           'Вы на первой странице!')
+            return
+
+        db.UserMenuCounter.objects(owner=user).update(dec__counter=12)
+        keyboard = InlineKB().generate_products_buttons(call.message.chat.id, category)
+
+    elif call.data.split('_')[0] == 'forward':
+
+        if db.UserMenuCounter.objects(owner=user).get().counter + 6 - db.Product.objects(category=category).count() > 5:
+
+            bot.answer_callback_query(callback_query_id=call.id,
+                                      show_alert=True,
+                                      text='ОШИБКА: \n'
+                                           'Вы на последней странице!')
+
+            return
+
+        keyboard = InlineKB().generate_products_buttons(call.message.chat.id, category)
+
+    bot.edit_message_text(text=category.title, chat_id=call.message.chat.id,
+                          message_id=call.message.message_id,
+                          reply_markup=keyboard)
 
 
 @bot.callback_query_handler(func=lambda call: call.data.split('_')[0] == 'back')
@@ -196,17 +252,24 @@ def go_back(call):
                                           callback_data=f'back_{category.parent.id}'))
 
     text = 'Категории' if not category.parent else category.parent.title
-    bot.edit_message_text(text=text, chat_id=call.message.chat.id,
-                          message_id=call.message.message_id,
-                          reply_markup=keyboard)
+    try:
+
+        bot.edit_message_text(text=text, chat_id=call.message.chat.id,
+                              message_id=call.message.message_id,
+                              reply_markup=keyboard)
+
+    except telebot.apihelper.ApiException:
+        bot.delete_message(call.message.chat.id, call.message.message_id)
 
 
 @bot.callback_query_handler(func=lambda call: call.data.split('_')[0] == 'cart')
 def add_to_cart(call):
-    # user = db.User.objects(id=call.data.)
-    # if not db.Cart.objects(owner=)
-    product = db.Product.objects(id=call.data.split('_')[1]).get()
     user = db.User.objects(user_id=str(call.message.chat.id)).get()
+
+    if not db.Cart.objects(owner=user):
+        user.create_cart()
+
+    product = db.Product.objects(id=call.data.split('_')[1]).get()
     user.update_cart(product)
 
 
@@ -216,11 +279,9 @@ def show_sales_products(message):
     products = db.Product.get_discount_product()
 
     keyboard = InlineKB().generate_kb(
-        **{f'product_{d.id}': d.title for d in products})  # FIXME make less code
+        **{f'product_{d.id}': d.title for d in products})  # TODO Добавить кнопку назад
 
-        # keyboard.add(InlineKeyboardButton(text=f'<< ', callback_data=f'back_{category.id}'))
-
-    bot.send_message(text='%%% Скидки %%%', chat_id=message.chat.id,
+    bot.send_message(text='Скидки', chat_id=message.chat.id,
                           reply_markup=keyboard)
 
 
@@ -232,8 +293,9 @@ def show_info(message):
 
 
 if __name__ == '__main__':
-    import time
-    bot.remove_webhook()
-    time.sleep(1)
-    bot.set_webhook(config.WEBHOOK_URL)
-    app.run(debug=True)
+    # import time
+    # bot.remove_webhook()
+    # time.sleep(1)
+    # bot.set_webhook(config.WEBHOOK_URL)
+    bot.polling(none_stop=True)
+    # app.run(debug=True)
