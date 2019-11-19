@@ -36,9 +36,7 @@ def start(message):
 
     if not db.User.objects(user_id=str(message.chat.id)):
 
-        db.User.create_user(str(message.chat.id), f'{message.chat.last_name} ',
-                                                  f'{message.chat.first_name}',
-                                                  message.chat.username)
+        db.User.create_user(str(message.chat.id), 'aasdf', message.chat.username)
 
     greeting_str = 'Добро пожаловать в виртуальный мир BEATLEX'
     keyboard = ReplyKB().generate_kb(*keyboards.beginning_kb.values())
@@ -296,9 +294,9 @@ if __name__ == '__main__':
 
     import time
 
-    bot.remove_webhook()
-    time.sleep(1)
-    bot.set_webhook(config.WEBHOOK_URL,
-                    certificate=open('webhook_cert.pem', 'r'))
+    # bot.remove_webhook()
+    # time.sleep(1)
+    # bot.set_webhook(config.WEBHOOK_URL,
+    #                 certificate=open('webhook_cert.pem', 'r'))
     # bot.polling(none_stop=True
     app.run(debug=True)
