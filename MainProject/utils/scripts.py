@@ -14,12 +14,19 @@ def strike(text):
 # ******************************** Получить текущую цену ******************************
 
 
-def get_price(product):
+def get_price(product, for_print=False):
 
     if product.is_discount:
-        return product.new_price, strike(str(product.price))
 
-    return product.price, product.price
+        if not for_print:
+            return product.new_price, strike(str(product.price))
+
+        return f'{strike(str(product.price))} {product.new_price}'
+
+    if not for_print:
+        return product.price, product.price
+
+    return product.price
 # *************************************************************************************
 
 # ******************* Получить стоимосте всех товаро в корзине ************************
@@ -44,3 +51,20 @@ def get_cart_price(cart):
     return price
 
 # *************************************************************************************
+
+# ************************* Валидация телефона ****************************************
+
+
+def phone_validate(phone):
+
+    phone = phone.text
+    if '+' in phone:
+        phone = phone.replace('+', '')
+
+    if len(phone) == 12 or len(phone) == 9 and phone.isdigit():
+        return True
+
+    return False
+
+# *************************************************************************************
+

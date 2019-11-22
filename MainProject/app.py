@@ -8,7 +8,7 @@ import config
 import keyboards
 from models import models as db
 
-from utils.scripts import strike, get_cart_price
+from utils.scripts import strike, get_cart_price, get_price, phone_validate
 
 from flask import Flask, request, abort
 
@@ -42,7 +42,8 @@ def start(message):
 
     greeting_str = 'Добро пожаловать в виртуальный мир BEATLEX'
     keyboard = ReplyKB().generate_kb(*keyboards.beginning_kb.values())
-
+    keyboard.add('Личный кабинет')
+    
     bot.send_message(message.chat.id, greeting_str, reply_markup=keyboard)
 
 
@@ -56,6 +57,30 @@ def show_cart(message):  # TODO Добавить возможнсоти поль
                      reply_markup=InlineKB().generate_cart_kb(cart))
 
 
+@bot.message_handler(func=lambda message: message.text == 'Личный кабинет')
+def personal_account(message):
+    
+    keyboard = InlineKB().generate_pa(message.chat.id)
+    
+    bot.send_message(message.chat.id, 'Личный Кабинет',
+                     reply_markup=keyboard)
+
+
+@bot.callback_query_handler(func=lambda call: call.data.split('_')[0] == 'add')
+def edit_user_info(call):
+
+    print(call.data)
+    user = db.User.objects(user_id=str(call.message.chat.id)).get()
+
+    if call.data.split('_')[1] == 'phone':  # TODO Добавить верификацю с смс
+        bot.send_message(call.message.chat.id, 'Ведтие ваш номер телефона:')
+
+        @bot.message_handler(func=phone_validate)
+        def add_phone(message):
+            user.update(**{'phone': message.text})
+            bot.send_message(message.chat.id, 'Спасибо ваш номер добавлен')
+
+
 @bot.callback_query_handler(func=lambda call: call.data.split('_')[0] == 'help')
 def popup_cart_help(call):
 
@@ -65,7 +90,10 @@ def popup_cart_help(call):
         'Удалить': 'Нажмите на красный знакчок чтобы удалить товар с корзины',
         'cart': 'Это общая цена всех товаров в корзине',  # TODO Попробовать добавить общую цену без скидок
         'product': 'Здесь указано ваще текущее положение нажимайте кнопки < или > для перемещения',
-        'empty': 'Здесь нет товара'
+        'empty': 'Здесь нет товара',
+        'login': 'Здесь ваш логин',
+        'fullname': 'Здесь ваше имя в телеграмм',
+        'phone': 'Здесь ваш телефон'
     }
 
     bot.answer_callback_query(callback_query_id=call.id,
@@ -109,6 +137,28 @@ def buy_cart(call):  # FIXME Перенести в скрипиться поду
     cart.update(set__all_products=[])
 
     bot.send_message(call.message.chat.id, 'Спасибо за покупку :)')
+
+
+@bot.callback_query_handler(func=lambda call: call.data.split('_')[0] == 'carthistory')
+def show_order_history(call):
+
+    keyboard = InlineKB().generate_order_history_kb(call.message.chat.id)
+
+    bot.send_message(call.message.chat.id, 'История покупок',
+                     reply_markup=keyboard)
+
+
+@bot.callback_query_handler(func=lambda call: call.data.split('_')[0] == 'history')
+def show_old_cart(call):
+
+    user = db.User.objects(user_id=str(call.data.message.id)).get()
+    cart = db.OrderHistory(owner=user)
+
+    # for p in cart.cart:
+    #
+    #     product = db.Product(id=p).get()
+    #
+    #     bot.send_message(call.message.chat.id, '')
 
 
 @bot.message_handler(func=lambda message: message.text == 'Последние новости')
@@ -179,63 +229,46 @@ def show_product(call):
 
     keyboard.add(InlineKeyboardButton(text=f'<< {category.title}', callback_data=f'back_{category.id}'))
 
-    if product.is_discount:  # FIXME Убрать два условия используя функцию скриптах
-        bot.send_photo(call.message.chat.id, product.img.read(), caption=f'Вы вибрали продукт {product.title} \n\n'
-                                                                         f'Описание: \n'
-                                                                         f'{product.description} \n\n'
-                                                                         f'Цена: {strike(str(product.price))} '
-                                                                         f'{product.new_price}',
-                                                                         reply_markup=keyboard,
-                                                                         parse_mode='HTML')
-
-    else:
-        bot.send_photo(call.message.chat.id, product.img.read(), caption=f'Вы вибрали продукт {product.title} \n\n'
-                                                                         f'Описание: \n'
-                                                                         f'{product.description} \n\n'
-                                                                         f'Цена: <b>{product.price}</b>',
-                                                                         reply_markup=keyboard,
-                                                                         parse_mode='HTML')
+    bot.send_photo(call.message.chat.id, product.img.read(), caption=f'Вы вибрали продукт {product.title} \n\n'
+                                                                     f'Описание: \n'
+                                                                     f'{product.description} \n\n'
+                                                                     f'Цена: {get_price(product, for_print=True)}',
+                                                                     reply_markup=keyboard,
+                                                                     parse_mode='HTML')
 
 
-@bot.callback_query_handler(func=lambda call: call.data.split('_')[0] in ['sback', 'forward'])
+@bot.callback_query_handler(func=lambda call: call.data.split('_')[0] in ['left', 'right'])
 def swipe(call):
 
     user = db.User.objects(user_id=str(call.message.chat.id)).get()
     category = db.Category.objects(title=call.data.split('_')[2]).get()
 
-    if call.data.split('_')[0] == 'sback':
-
-        if db.UserMenuCounter.objects(owner=user).get().counter - 6 == 0:
-
-            bot.answer_callback_query(callback_query_id=call.id,
-                                      show_alert=True,
-                                      text='ОШИБКА: \n'
-                                           'Вы на первой странице!')
-            return
+    if call.data.split('_')[0] == 'left':
 
         db.UserMenuCounter.objects(owner=user).update(dec__counter=12)
         keyboard = InlineKB().generate_products_buttons(call.message.chat.id, category)
 
-    elif call.data.split('_')[0] == 'forward':
-
-        if db.UserMenuCounter.objects(owner=user).get().counter + 6 - db.Product.objects(category=category).count() > 5:
-
-            bot.answer_callback_query(callback_query_id=call.id,
-                                      show_alert=True,
-                                      text='ОШИБКА: \n'
-                                           'Вы на последней странице!')
-
-            return
-
+    elif call.data.split('_')[0] == 'right':
         keyboard = InlineKB().generate_products_buttons(call.message.chat.id, category)
 
-    bot.edit_message_text(text=category.title, chat_id=call.message.chat.id,
-                          message_id=call.message.message_id,
-                          reply_markup=keyboard)
+    if not keyboard:
+        bot.answer_callback_query(callback_query_id=call.id,
+                                  show_alert=True,
+                                  text='ОШИБКА: \n'
+                                       'Вы хотите переместиться на не существующую страницу!')
+
+    else:
+        bot.edit_message_text(text=category.title, chat_id=call.message.chat.id,
+                              message_id=call.message.message_id,
+                              reply_markup=keyboard)
 
 
 @bot.callback_query_handler(func=lambda call: call.data.split('_')[0] == 'back')
 def go_back(call):
+
+    if call.data.split('_')[1] == 'delete':
+        bot.delete_message(call.message.chat.id, call.message.message_id)
+        return
 
     obj_id = call.data.split('_')[1]
     category = db.Category.objects(id=obj_id).get()
@@ -296,9 +329,9 @@ if __name__ == '__main__':
 
     import time
 
-    # bot.remove_webhook()
-    # time.sleep(1)
-    # bot.set_webhook(config.WEBHOOK_URL,
-    #                 certificate=open('webhook_cert.pem', 'r'))
-    # bot.polling(none_stop=True
+    bot.remove_webhook()
+    time.sleep(1)
+    bot.set_webhook(config.WEBHOOK_URL,
+                    certificate=open('webhook_cert.pem', 'r'))
+    # bot.polling(none_stop=True)
     app.run(debug=True)

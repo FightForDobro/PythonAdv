@@ -98,8 +98,13 @@ class InlineKB(InlineKeyboardMarkup):
         return self
         # --------------------------------------------------------------------------
 
-    def generate_products_buttons(self, user_id, category):
-
+    def generate_products_buttons(self, user_id, category, b_count=6):
+        
+        if b_count % 3 != 0:
+            
+            raise ValueError(f'Button count must be divide by 3 \n'
+                             f'Current count: {b_count}')
+        
         user_id = str(user_id)
         user = db.User.objects(user_id=user_id).get()
         products = db.Product.objects(category=category)
@@ -110,44 +115,86 @@ class InlineKB(InlineKeyboardMarkup):
             db.UserMenuCounter(**{'owner': user}).save()    
 
         counter.update({user_id: db.UserMenuCounter.objects(owner=user).get().counter})
+        
+        if counter[user_id] < 0 or counter[user_id] > products.count():
+            return False
 
-        if counter[user_id] > len(products):
-
-            counter[user_id] += len(products) % 6
+        # if counter[user_id] > len(products):
+        # 
+        #     counter[user_id] += len(products) % b_count
 
         buttons = []
 
-        while len(buttons) != 9:
+        # while len(buttons) != b_count + 3:
 
-            for i, p in enumerate(products[db.UserMenuCounter.objects(owner=user).get().counter::]):
+        for i, p in enumerate(products[db.UserMenuCounter.objects(owner=user).get().counter::]):
 
-                if len(buttons) == 9:
-                    break
+            if len(buttons) == b_count + 3:
+                break
 
-                if i <= 6:
-                    buttons.append(InlineKeyboardButton(text=f'{p.title}',
-                                                        callback_data=f'product_{p.id}'))
+            if i <= b_count:
+                buttons.append(InlineKeyboardButton(text=f'{p.title}',
+                                                    callback_data=f'product_{p.id}'))
+                counter[str(user_id)] += 1
+
+            if b_count > len(products[db.UserMenuCounter.objects(owner=user).get().counter::]) > i:
+
+                for _ in range(b_count - len(products[db.UserMenuCounter.objects(owner=user).get().counter::])):
+                    buttons.append(InlineKeyboardButton(text=' ', callback_data=f'help_empty'))
                     counter[str(user_id)] += 1
 
-                if 6 > len(products[db.UserMenuCounter.objects(owner=user).get().counter::]) > i:
+            if counter[str(user_id)] == db.UserMenuCounter.objects(owner=user).get().counter + b_count:
 
-                    for _ in range(6 - len(products[db.UserMenuCounter.objects(owner=user).get().counter::])):
-                        buttons.append(InlineKeyboardButton(text=' ', callback_data=f'help_empty'))
-                        counter[str(user_id)] += 1
+                db.UserMenuCounter.objects(owner=user).update(counter=counter[user_id])
 
-                if counter[str(user_id)] == db.UserMenuCounter.objects(owner=user).get().counter + 6:
+                buttons.append(InlineKeyboardButton(text=' < ', callback_data=f'left_{user_id}_{category.title}'))
+                buttons.append(InlineKeyboardButton(text=f'{counter[user_id] // b_count}/{ceil(len(products) / b_count)}',
+                                                    callback_data=f'help_product'))
+                buttons.append(InlineKeyboardButton(text=' > ', callback_data=f'right_{user_id}_{category.title}'))
 
-                    db.UserMenuCounter.objects(owner=user).update(counter=counter[user_id])
-
-                    buttons.append(InlineKeyboardButton(text=' < ', callback_data=f'sback_{user_id}_{category.title}'))
-                    buttons.append(InlineKeyboardButton(text=f' {counter[user_id] // 6}/{ceil(len(products) / 6)} ',
-                                                        callback_data=f'help_product'))
-                    buttons.append(InlineKeyboardButton(text=' > ', callback_data=f'forward_{user_id}_{category.title}'))
-
-        print(buttons)
-        print(self)
         self.add(*buttons)
         self.add(InlineKeyboardButton(text=f'<< {category.title}', callback_data=f'back_{category.id}'))
+
+        return self
+
+    def generate_pa(self, user_id):
+
+        user = db.User.objects(user_id=str(user_id)).get()
+
+        first_row = [{'Логин: ': 'help_login', user.nickname: 'help_login'}]
+        second_row = [{'Полное имя: ': 'help_fullname', user.fullname: 'help_fullname'}]
+        third_row = [{'Телефон: ': 'help_phone', 'Добавить' if not user.phone else user.phone: 'add_phone'}]
+        fourth_row = [{'История покупок': f'carthistory_{user_id}'}]
+        
+        rows = [first_row, second_row, third_row, fourth_row]
+
+        for row in rows:
+            for elem in row:
+
+                buttons = [InlineKeyboardButton(text=t, callback_data=d) for t, d in elem.items()]
+                self.add(*buttons)
+
+        return self
+
+    def generate_order_history_kb(self, user_id):
+
+        user = db.User.objects(user_id=str(user_id)).get()
+
+        user_history = db.OrderHistory.objects(owner=user)
+
+        main_row = {'Статус:': 'help_status', 'Дата:': 'hel_date', 'Цена:': 'help_price'}
+
+        buttons = [InlineKeyboardButton(text=t, callback_data=d) for t, d in main_row.items()]
+
+        self.add(*buttons)
+
+        for cart in user_history:
+
+            data_row = [cart.status, str(cart.datetime).split(' ')[0], cart.full_price]
+            buttons = [InlineKeyboardButton(text=t, callback_data=f'history_{cart.id}') for t in data_row]
+            self.add(*buttons)
+
+        self.add(InlineKeyboardButton(text=f'<< Назад <<', callback_data='back_delete'))
         return self
 
 # class InlineKBNew(InlineKeyboardMarkup):

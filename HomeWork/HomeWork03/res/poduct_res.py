@@ -1,6 +1,5 @@
 from flask_restful import Resource
 from flask import request, jsonify
-
 from HomeWork.HomeWork03.models.product import Product, Category
 from HomeWork.HomeWork03.schemes.product_scheme import ProductScheme, CategoryScheme
 

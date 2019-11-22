@@ -12,8 +12,7 @@ class Texts(Document):
 
 
 class Properties(DynamicEmbeddedDocument):
-
-    weight = FloatField(min_value=0)
+    pass
 
 
 class Category(Document):
@@ -55,7 +54,7 @@ class Product(Document):
     is_discount = BooleanField(default=False)
     properties = EmbeddedDocumentField(Properties)
     category = ReferenceField(Category)
-    img = FileField()
+    img = FileField(default=None)  # FIXME добавить дефолт изображение
 
     @property
     def get_price(self):
