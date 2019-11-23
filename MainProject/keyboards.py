@@ -119,13 +119,7 @@ class InlineKB(InlineKeyboardMarkup):
         if counter[user_id] < 0 or counter[user_id] > products.count():
             return False
 
-        # if counter[user_id] > len(products):
-        # 
-        #     counter[user_id] += len(products) % b_count
-
         buttons = []
-
-        # while len(buttons) != b_count + 3:
 
         for i, p in enumerate(products[db.UserMenuCounter.objects(owner=user).get().counter::]):
 
@@ -191,12 +185,21 @@ class InlineKB(InlineKeyboardMarkup):
         for cart in user_history:
 
             data_row = [cart.status, str(cart.datetime).split(' ')[0], cart.full_price]
-            buttons = [InlineKeyboardButton(text=t, callback_data=f'history_{cart.id}') for t in data_row]
+            buttons = [InlineKeyboardButton(text=t, callback_data=f'history_{cart.id}_0') for t in data_row]
             self.add(*buttons)
 
         self.add(InlineKeyboardButton(text=f'<< Назад <<', callback_data='back_delete'))
         return self
 
+    def generate_swipe(self, page, user_id):
+
+        keys = {'<<': page - 1}, {'>>': page + 1}
+
+        buttons = [InlineKeyboardButton(text=t, callback_data=f'history_{user_id}_{page}') for t, d in keys.items()]
+
+        self.add(*buttons)
+
+        return self
 # class InlineKBNew(InlineKeyboardMarkup):
 #
 #     def __init__(self, iterable, named_arg, lookup_field=id, title_field='title', row_width=3):

@@ -1,6 +1,7 @@
-from models.models import (Category,
+from MainProject.models.models import (Category,
                             Product,
                             News)
+from MainProject.models impo
 import lorem
 from random import choice, randint
 
@@ -124,9 +125,9 @@ def news_seeder(amount):
 # Category(**cat_example).save()
 
 
-# category_seeder()
-product_seeder(1)
-# news_seeder(8)
+category_seeder()
+product_seeder(100)
+news_seeder(8)
 
 # sub_category = {
 #     'title': 'Action',

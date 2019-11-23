@@ -152,13 +152,14 @@ def show_order_history(call):
 def show_old_cart(call):
 
     user = db.User.objects(user_id=str(call.data.message.id)).get()
-    cart = db.OrderHistory(owner=user)
-
-    # for p in cart.cart:
-    #
-    #     product = db.Product(id=p).get()
-    #
-    #     bot.send_message(call.message.chat.id, '')
+    cart = db.OrderHistory.objects(owner=user)
+    product = db.Product.objects(id=cart.cart[int(call.data.split('_')[2])]).get()
+    bot.send_photo(call.message.chat.id, product.img.read(), caption=f'Вы вибрали продукт {product.title} \n\n'
+                                                                     f'Описание: \n'
+                                                                     f'{product.description} \n\n'
+                                                                     f'Цена: {get_price(product, for_print=True)}',
+                   reply_markup=InlineKB().generate_swipe(call.data.split('_')[2], call.message.chat.id),
+                   parse_mode='HTML')
 
 
 @bot.message_handler(func=lambda message: message.text == 'Последние новости')
@@ -201,9 +202,9 @@ def show_product_or_subcategory(call):
 
         keyboard.add(InlineKeyboardButton(text=f'<< {category.title}', callback_data=f'back_{category.id}'))
 
-        bot.edit_message_text(text=category.title, chat_id=call.message.chat.id,
-                              message_id=call.message.message_id,
-                              reply_markup=keyboard)
+        # bot.edit_message_text(text=category.title, chat_id=call.message.chat.id,
+        #                       message_id=call.message.message_id,
+        #                       reply_markup=keyboard)
 
     else:
 
@@ -215,9 +216,9 @@ def show_product_or_subcategory(call):
 
         keyboard = InlineKB().generate_products_buttons(call.message.chat.id, category)
 
-        bot.edit_message_text(text=category.title, chat_id=call.message.chat.id,
-                              message_id=call.message.message_id,
-                              reply_markup=keyboard)
+    bot.edit_message_text(text=category.title, chat_id=call.message.chat.id,
+                          message_id=call.message.message_id,
+                          reply_markup=keyboard)
 
 
 @bot.callback_query_handler(func=lambda call: call.data.split('_')[0] == 'product')
@@ -327,11 +328,11 @@ def show_info(message):
 
 if __name__ == '__main__':
 
-    import time
-
-    bot.remove_webhook()
-    time.sleep(1)
-    bot.set_webhook(config.WEBHOOK_URL,
-                    certificate=open('webhook_cert.pem', 'r'))
-    # bot.polling(none_stop=True)
-    app.run(debug=True)
+    # import time
+    #
+    # bot.remove_webhook()
+    # time.sleep(1)
+    # bot.set_webhook(config.WEBHOOK_URL,
+    #                 certificate=open('webhook_cert.pem', 'r'))
+    bot.polling(none_stop=True)
+    # app.run(debug=True)

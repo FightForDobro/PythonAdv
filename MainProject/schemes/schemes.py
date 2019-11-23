@@ -6,13 +6,16 @@ class PropertiesScheme(Schema):
     pass
 
 
-class CategoryScheme(Schema):
+class LazyCatScheme(Schema):
 
     id = fields.String()
     title = fields.String()
     description = fields.String()
-    # subcategory = fields.List(fields.Nested('self'))
     parent = fields.Nested('self')
+
+
+class CategoryScheme(LazyCatScheme):
+    subcategory = fields.List(fields.Nested(LazyCatScheme))
 
 
 class ProductScheme(Schema):
