@@ -1,6 +1,6 @@
 from mongoengine import *
 from datetime import datetime
-
+from utils.scripts import default_photo
 
 connect('web_shop_bot')
 
@@ -54,7 +54,7 @@ class Product(Document):
     is_discount = BooleanField(default=False)
     properties = EmbeddedDocumentField(Properties)
     category = ReferenceField(Category)
-    img = FileField(default=None)  # FIXME добавить дефолт изображение
+    img = BinaryField(default=default_photo())
 
     @property
     def get_price(self):
@@ -90,6 +90,7 @@ class User(Document):
     fullname = StringField()
     nickname = StringField()
     phone = StringField()
+    active = BooleanField(default=True)
 
     @classmethod
     def create_user(cls, user_id, fullname, nickname, phone=None):
@@ -102,6 +103,11 @@ class User(Document):
         }
 
         cls(**user_dict).save().create_cart()
+
+    @property
+    def is_active(self):
+
+        return self.active
 
     def create_cart(self):
 

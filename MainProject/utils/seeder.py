@@ -1,9 +1,9 @@
 from MainProject.models.models import (Category,
                             Product,
                             News)
-from MainProject.models impo
 import lorem
 from random import choice, randint
+from utils.scripts import default_photo
 
 
 def category_seeder():
@@ -74,13 +74,9 @@ def product_seeder(amount):
 
         }
 
-        default_img = open('../img/default.png', 'rb')  # FIXME Сделать так чтобы одна фотка была для всех добавить проверку к NONE и не хранить картинку
-
         product = Product(**product_dict)
-        product.img.put(default_img, content_type='image/png/')
+        product.img.put(default_photo, content_type='image/png/')
         product.save()
-
-        default_img.close()
 
 
 def news_seeder(amount):

@@ -83,7 +83,7 @@ class InlineKB(InlineKeyboardMarkup):
 
         # Генератор кнопок для корзины
         for p in cart.all_products:
-
+            
             current_price = get_price(p)
             self.add(InlineKeyboardButton(text=p.title,
                                           callback_data=f'product_{p.id}'),
@@ -98,7 +98,7 @@ class InlineKB(InlineKeyboardMarkup):
         return self
         # --------------------------------------------------------------------------
 
-    def generate_products_buttons(self, user_id, category, b_count=6):
+    def generate_products_buttons(self, user_id, category, b_count, back=False):
         
         if b_count % 3 != 0:
             
@@ -109,6 +109,9 @@ class InlineKB(InlineKeyboardMarkup):
         user = db.User.objects(user_id=user_id).get()
         products = db.Product.objects(category=category)
 
+        if back:
+            db.UserMenuCounter.objects(owner=user).update(dec__counter=b_count*2)
+
         counter = {}
 
         if not db.UserMenuCounter.objects(owner=user):
@@ -116,7 +119,11 @@ class InlineKB(InlineKeyboardMarkup):
 
         counter.update({user_id: db.UserMenuCounter.objects(owner=user).get().counter})
         
-        if counter[user_id] < 0 or counter[user_id] > products.count():
+        if counter[user_id] < 0:
+            db.UserMenuCounter.objects(owner=user).update(counter=0)
+            return False
+
+        elif counter[user_id] > products.count():
             return False
 
         buttons = []
@@ -131,7 +138,7 @@ class InlineKB(InlineKeyboardMarkup):
                                                     callback_data=f'product_{p.id}'))
                 counter[str(user_id)] += 1
 
-            if b_count > len(products[db.UserMenuCounter.objects(owner=user).get().counter::]) > i:
+            if b_count > len(products[db.UserMenuCounter.objects(owner=user).get().counter::]) <= len(buttons):
 
                 for _ in range(b_count - len(products[db.UserMenuCounter.objects(owner=user).get().counter::])):
                     buttons.append(InlineKeyboardButton(text=' ', callback_data=f'help_empty'))
@@ -191,15 +198,21 @@ class InlineKB(InlineKeyboardMarkup):
         self.add(InlineKeyboardButton(text=f'<< Назад <<', callback_data='back_delete'))
         return self
 
-    def generate_swipe(self, page, user_id):
+    def generate_swipe(self, page, cart_id):
 
-        keys = {'<<': page - 1}, {'>>': page + 1}
+        cart = db.OrderHistory.objects(id=cart_id).get()
 
-        buttons = [InlineKeyboardButton(text=t, callback_data=f'history_{user_id}_{page}') for t, d in keys.items()]
+        keys = {'<<': page - 1, '>>': page + 1}
+
+        if page < len(cart.cart) - 1 or page + 1 > len(cart.cart):
+            return False
+
+        buttons = [InlineKeyboardButton(text=t, callback_data=f'history_{cart_id}_{d}') for t, d in keys.items()]
 
         self.add(*buttons)
-
+        self.add(InlineKeyboardButton(text=f'<< Назад <<', callback_data='back_delete'))
         return self
+
 # class InlineKBNew(InlineKeyboardMarkup):
 #
 #     def __init__(self, iterable, named_arg, lookup_field=id, title_field='title', row_width=3):
