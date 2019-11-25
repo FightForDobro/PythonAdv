@@ -67,7 +67,7 @@ class Product(Document):
         return cls.objects(is_discount=True, **kwargs)
 
     def add_img(self, img):
-        self.img.put(img, content_type='image/jpg')
+        self.img = img
         self.save()
 
 

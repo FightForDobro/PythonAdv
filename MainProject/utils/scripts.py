@@ -1,4 +1,8 @@
-import models.models as db
+import os, sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+print(sys.path)
+
+import models as db
 
 # ******************************** Перечеркнутый текст ********************************
 
@@ -73,7 +77,7 @@ def phone_validate(phone):
 
 def default_photo():
 
-    with open('/home/ffd/Downloads/PythonAdv/MainProject/img/default.png', 'rb') as f:
+    with open('/home/fightfordobro/PythonAdv/MainProject/img/default.png', 'rb') as f:
 
         return f.read()
 

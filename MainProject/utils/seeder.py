@@ -1,9 +1,14 @@
-from MainProject.models.models import (Category,
-                            Product,
-                            News)
+import sys
+import os
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from models.models import (Category,
+                           Product,
+                           News)
 import lorem
 from random import choice, randint
-from utils.scripts import default_photo
+from scripts import default_photo
 
 
 def category_seeder():
@@ -75,7 +80,7 @@ def product_seeder(amount):
         }
 
         product = Product(**product_dict)
-        product.img.put(default_photo, content_type='image/png/')
+#        product.img.put(default_photo, content_type='image/png/')
         product.save()
 
 
@@ -92,7 +97,7 @@ def news_seeder(amount):
 
 
 # category_seeder()
-# product_seeder(7)
+product_seeder(7)
 # news_seeder(8)
 
 # subsub_cut_example = {
@@ -121,18 +126,20 @@ def news_seeder(amount):
 # Category(**cat_example).save()
 
 
-category_seeder()
-product_seeder(100)
-news_seeder(8)
+#category_seeder()
+#product_seeder(100)
+#news_seeder(8)
 
-# sub_category = {
-#     'title': 'Action',
-#     'description': lorem.sentence()
-# }
-#
-# subsub_c = Category(**sub_category).save()
-#
-# main_c = Category.objects(id='5dcfe322f13e1638a59825a9').get().add_subcategory(subsub_c)
+#sub_category = {
+#   'title': 'Action',
+#    'description': lorem.sentence()
+#}
+
+#subsub_c = Category(**sub_category).save()
+
+subsub_c = Category.objects(title='Action').get()
+
+main_c = Category.objects(title='PC').get().add_subcategory(subsub_c)
 
 
 
