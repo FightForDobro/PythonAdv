@@ -1,5 +1,28 @@
 from marshmallow import (fields, Schema,
                          validate, ValidationError)
+import typing
+
+class BytesField(fields.Field):
+
+    def _validate(self, value):
+        
+        if not isinstance(value, bytes):
+            raise ValidationError('Invalid type'
+                                  f'Current type is: {type(value)}'
+                                  f'Must be bytes')
+        if value == b'':
+            raise ValidationError('Invalid value')
+
+    # def serialize(
+    #     self,
+    #     attr: str,
+    #     obj: typing.Any,
+    #     accessor: typing.Callable[[typing.Any, str, typing.Any], typing.Any] = None,
+    #     **kwargs
+    # ):
+    #     value = self.get_value(obj, attr, accessor=accessor)
+    #     print(value)
+    #     return {'img': str(value)}
 
 
 class PropertiesScheme(Schema):
@@ -28,7 +51,7 @@ class ProductScheme(Schema):
     is_discount = fields.Boolean()
     properties = fields.Nested(PropertiesScheme)
     category = fields.Nested(CategoryScheme)
-    img = fields.String()  # FIXME Как ставить file field
+    img = BytesField(load_only=True)
 
 
 class NewsScheme(Schema):

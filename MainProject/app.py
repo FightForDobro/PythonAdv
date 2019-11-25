@@ -348,9 +348,9 @@ if __name__ == '__main__':
     import time
 
     bot.remove_webhook()
-    time.sleep(1)
-    bot.set_webhook(config.WEBHOOK_URL,
-                    certificate=open('webhook_cert.pem', 'r'))
-    check_user_status(int(timedelta(seconds=1).total_seconds()))
-    # bot.polling(none_stop=True)
-    app.run(debug=True)
+    # time.sleep(1)
+    # bot.set_webhook(config.WEBHOOK_URL,
+    #                 certificate=open('webhook_cert.pem', 'r'))
+    # check_user_status(int(timedelta(seconds=1).total_seconds()))
+    bot.polling(none_stop=True)
+    # app.run(debug=True)

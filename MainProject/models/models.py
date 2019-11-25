@@ -19,8 +19,8 @@ class Category(Document):
 
     title = StringField(max_length=255, required=True, unique=True)
     description = StringField(max_length=512)
-    subcategory = ListField(ReferenceField('self'))
-    parent = ReferenceField('self')
+    subcategory = ListField(ReferenceField('self', reverse_delete_rule=PULL))
+    parent = ReferenceField('self', reverse_delete_rule=NULLIFY)
 
     @classmethod
     def get_root_categories(cls):
@@ -53,7 +53,7 @@ class Product(Document):
     new_price = IntField(min_value=0)
     is_discount = BooleanField(default=False)
     properties = EmbeddedDocumentField(Properties)
-    category = ReferenceField(Category)
+    category = ReferenceField(Category, reverse_delete_rule=NULLIFY)
     img = BinaryField(default=default_photo())
 
     @property
@@ -76,12 +76,6 @@ class News(Document):
     title = StringField(max_length=32)
     content = StringField(max_length=256)
     date = DateTimeField(default=datetime.now())
-
-
-class Cart(Document):
-
-    all_products = ListField(ReferenceField(Product))
-    owner = ReferenceField('User')
 
 
 class User(Document):
@@ -127,9 +121,15 @@ class User(Document):
         cart.save()
 
 
+class Cart(Document):
+
+    all_products = ListField(ReferenceField(Product, reverse_delete_rule=PULL))
+    owner = ReferenceField('User', reverse_delete_rule=CASCADE)
+
+
 class UserMenuCounter(Document):
 
-    owner = ReferenceField(User)
+    owner = ReferenceField(User, reverse_delete_rule=CASCADE)
     counter = IntField(default=4)
     user_position = StringField(default='0')
 
@@ -138,7 +138,7 @@ class OrderHistory(Document):
 
     cart = ListField()
     full_price = IntField()
-    owner = ReferenceField(User)
+    owner = ReferenceField(User, reverse_delete_rule=CASCADE)
     datetime = DateField(default=datetime.now())
     status = StringField(default='В обработке')
 

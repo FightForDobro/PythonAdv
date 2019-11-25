@@ -7,6 +7,7 @@ from models.models import (Category,
 from schemes.schemes import (CategoryScheme,
                              ProductScheme,
                              NewsScheme)
+import json
 
 
 class CategoryRes(Resource):
@@ -40,7 +41,7 @@ class CategoryRes(Resource):
 
         return CategoryScheme().dump(obj.reload())
 
-    def delete(self, c_id):  # FIXME Починить сделать так чтобы удалсяьс котигори парент и тд
+    def delete(self, c_id):
 
         obj = Category.objects(id=c_id).get()
 
@@ -63,21 +64,53 @@ class ProductRes(Resource):
 
     def post(self):
 
-        category = request.json.pop('category')
-        request.json['category'] = Category.objects(id=(category['id'])).get()
-        obj = Product(**request.json)
-        obj.save()
+        if not request.json:
 
+            data = json.loads(request.form['request'])
+
+            if request.files:
+                data['img'] = request.files['img'].read()
+
+            if data.get('category'):
+                category = data.pop('category')
+                data['category'] = Category.objects(id=(category['id'])).get()
+
+            obj = Product(**data)
+
+        else:
+
+            category = request.json.pop('category')
+            request.json['category'] = Category.objects(id=(category['id'])).get()
+            obj = Product(**request.json)
+
+        obj.save()
         return ProductScheme().dump(obj)
 
     def put(self, p_id):
 
-        if request.json.get('category'):
-            category = request.json.pop('category')
-            request.json['category'] = Category.objects(id=(category['id'])).get()
-
         obj = Product.objects(id=p_id).get()
-        obj.update(**request.json)
+
+        if not request.json:
+
+            if request.files:
+                obj.update(**{'img': request.files['img'].read()})
+
+            data = json.loads(request.form['request'])
+
+            if data.get('category'):
+                category = data.pop('category')
+                data['category'] = Category.objects(id=(category['id'])).get()
+
+            obj.update(**data)
+
+        else:
+
+            if request.json.get('category'):
+
+                category = request.json.pop('category')
+                request.json['category'] = Category.objects(id=(category['id'])).get()
+
+            obj.update(**request.json)
 
         return ProductScheme().dump(obj.reload())
 
@@ -86,7 +119,6 @@ class ProductRes(Resource):
         obj.delete()
 
         return {p_id: 'DELETED'}
-
 
 
 class NewsRes(Resource):
