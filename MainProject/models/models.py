@@ -131,6 +131,7 @@ class UserMenuCounter(Document):
 
     owner = ReferenceField(User)
     counter = IntField(default=4)
+    user_position = StringField(default='0')
 
 
 class OrderHistory(Document):

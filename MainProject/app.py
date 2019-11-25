@@ -7,6 +7,7 @@ from keyboards import ReplyKB, InlineKB
 import config
 import keyboards
 from models import models as db
+# from models.models import UserMenuCounter as user_pos
 from utils.scripts import strike, get_cart_price, get_price, phone_validate
 from utils.cron import cron_decorator
 from flask import Flask, request, abort
@@ -33,6 +34,7 @@ def webhook():
 
 @bot.message_handler(commands=['start'])
 def start(message):
+
     if not db.User.objects(user_id=str(message.chat.id)):
         db.User.create_user(str(message.chat.id), f'{message.chat.last_name}',
                             f'{message.chat.first_name}',
@@ -48,7 +50,7 @@ def start(message):
 
 
 @bot.message_handler(func=lambda message: message.text == 'Корзина')
-def show_cart(message):  # TODO Добавить возможнсоти пользователю смотреть историю покупок
+def show_cart(message):
 
     user = db.User.objects(user_id=str(message.chat.id)).get()
     cart = db.Cart.objects(owner=user).get()
@@ -343,12 +345,12 @@ def check_user_status(wait_time):
 
 
 if __name__ == '__main__':
-    # import time
-    #
-    # bot.remove_webhook()
-    # time.sleep(1)
-    # bot.set_webhook(config.WEBHOOK_URL,
-    #                 certificate=open('webhook_cert.pem', 'r'))
+    import time
+
+    bot.remove_webhook()
+    time.sleep(1)
+    bot.set_webhook(config.WEBHOOK_URL,
+                    certificate=open('webhook_cert.pem', 'r'))
     check_user_status(int(timedelta(seconds=1).total_seconds()))
-    bot.polling(none_stop=True)
-    # app.run(debug=True)
+    # bot.polling(none_stop=True)
+    app.run(debug=True)
