@@ -1,8 +1,6 @@
-import os, sys
+import os
+import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-print(sys.path)
-
-import models as db
 
 # ******************************** Перечеркнутый текст ********************************
 
@@ -25,12 +23,12 @@ def get_price(product, for_print=False):
         if not for_print:
             return product.new_price, strike(str(product.price))
 
-        return f'{strike(str(product.price))} {product.new_price}'
+        return f'{strike(str(product.price))} {product.new_price} \U0001F4B2'
 
     if not for_print:
         return product.price, product.price
 
-    return product.price
+    return str(product.price) + '\U0001F4B2'
 # *************************************************************************************
 
 # ******************* Получить стоимосте всех товаро в корзине ************************
@@ -77,7 +75,7 @@ def phone_validate(phone):
 
 def default_photo():
 
-    with open('/home/fightfordobro/PythonAdv/MainProject/img/default.png', 'rb') as f:
+    with open('./img/default.png', 'rb') as f:
 
         return f.read()
 

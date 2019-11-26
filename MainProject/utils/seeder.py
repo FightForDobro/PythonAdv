@@ -5,7 +5,8 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from models.models import (Category,
                            Product,
-                           News)
+                           News,
+                           Texts)
 import lorem
 from random import choice, randint
 from scripts import default_photo
@@ -96,10 +97,29 @@ def news_seeder(amount):
         News(**news_dict).save()
 
 
-# category_seeder()
-product_seeder(7)
-# news_seeder(8)
+def definitions_help():
 
+    definition_help = {
+        'Название': 'Нажмите на названия чтобы вывести карту продукта',
+        'Цена': 'Нажмите на цену чтобы вывести старую цену продукта',
+        'Удалить': 'Нажмите на красный знакчок чтобы удалить товар с корзины',
+        'cart': 'Это общая цена всех товаров в корзине',  # TODO Попробовать добавить общую цену без скидок
+        'product': 'Здесь указано ваще текущее положение нажимайте кнопки < или > для перемещения',
+        'empty': 'Здесь нет товара',
+        'login': 'Здесь ваш логин',
+        'fullname': 'Здесь ваше имя в телеграмм',
+        'phone': 'Здесь ваш телефон'
+    }
+
+    for t, b in definition_help.items():
+
+        Texts(**{'title': t,
+                 'body': b}).save()
+
+# category_seeder()
+# product_seeder(7)
+# news_seeder(8)
+# definitions_help()
 # subsub_cut_example = {
 #     'title': 'Subcut of subcut',
 #     'description': 'i am the lowest in the current hierarchy'
@@ -137,9 +157,9 @@ product_seeder(7)
 
 #subsub_c = Category(**sub_category).save()
 
-subsub_c = Category.objects(title='Action').get()
-
-main_c = Category.objects(title='PC').get().add_subcategory(subsub_c)
+# subsub_c = Category.objects(title='Action').get()
+#
+# main_c = Category.objects(title='PC').get().add_subcategory(subsub_c)
 
 
 

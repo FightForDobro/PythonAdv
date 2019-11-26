@@ -1,6 +1,6 @@
 from marshmallow import (fields, Schema,
                          validate, ValidationError)
-import typing
+
 
 class BytesField(fields.Field):
 

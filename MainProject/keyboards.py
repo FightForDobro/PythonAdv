@@ -4,11 +4,11 @@ from utils.scripts import get_price, get_cart_price
 from math import ceil
 
 beginning_kb = {
-    'news': 'Последние новости',
-    'products': 'Продукти',
-    'sales': 'Продуккти со скидкой',
-    'about': 'Информации о магазине',
-    'user_cart': 'Корзина'
+    'news': 'Последние новости \U0001F4F0',
+    'products': 'Товары \U0001F6D2',
+    'sales': 'Товары со скидкой \U0001F4B8',
+    'about': 'Информация о магазине \U0001F4AC',
+    'user_cart': 'Корзина \U0001F6CD',
 }
 
 
@@ -75,7 +75,7 @@ class InlineKB(InlineKeyboardMarkup):
 
         # Базовые кнопки сверху
 
-        templates = ['Название', 'Цена', 'Удалить']
+        templates = ['Название \U0001F50E', 'Цена \U0001F4B5', 'Удалить \U0001F6AB']
         buttons = [(InlineKeyboardButton(str(b), callback_data=f'help_{b}')) for b in templates]
         self.add(*buttons)
 
@@ -87,13 +87,13 @@ class InlineKB(InlineKeyboardMarkup):
             current_price = get_price(p)
             self.add(InlineKeyboardButton(text=p.title,
                                           callback_data=f'product_{p.id}'),
-                     InlineKeyboardButton(text=current_price[0],
+                     InlineKeyboardButton(text=str(current_price[0]) + '\U0001F4B2',
                                           callback_data=f'old_{current_price[1]}'),
                      InlineKeyboardButton(text=cross_icon,
                                           callback_data=f'del_{p.id}'))
 
-        self.add(InlineKeyboardButton(text=f'Цена корзины: {get_cart_price(cart)}', callback_data='help_cart'))
-        self.add(InlineKeyboardButton(text='Купить', callback_data=f'buy_{cart.id}'))
+        self.add(InlineKeyboardButton(text=f'Цена корзины: {get_cart_price(cart)} \U0001F4B0', callback_data='help_cart'))
+        self.add(InlineKeyboardButton(text='Купить \U0001F9FE', callback_data=f'buy_{cart.id}'))
 
         return self
         # --------------------------------------------------------------------------
@@ -162,10 +162,10 @@ class InlineKB(InlineKeyboardMarkup):
 
         user = db.User.objects(user_id=str(user_id)).get()
 
-        first_row = [{'Логин: ': 'help_login', user.nickname: 'help_login'}]
-        second_row = [{'Полное имя: ': 'help_fullname', user.fullname: 'help_fullname'}]
-        third_row = [{'Телефон: ': 'help_phone', 'Добавить' if not user.phone else user.phone: 'add_phone'}]
-        fourth_row = [{'История покупок': f'carthistory_{user_id}'}]
+        first_row = [{'Логин: \U0001F465': 'help_login', user.nickname: 'help_login'}]
+        second_row = [{'Полное имя \U0001F4DB: ': 'help_fullname', user.fullname: 'help_fullname'}]
+        third_row = [{'Телефон: \U0001F4F1': 'help_phone', 'Добавить' if not user.phone else user.phone: 'add_phone'}]
+        fourth_row = [{'История покупок \U0001F6D2': f'carthistory_{user_id}'}]
         
         rows = [first_row, second_row, third_row, fourth_row]
 
@@ -183,7 +183,7 @@ class InlineKB(InlineKeyboardMarkup):
 
         user_history = db.OrderHistory.objects(owner=user)
 
-        main_row = {'Статус:': 'help_status', 'Дата:': 'hel_date', 'Цена:': 'help_price'}
+        main_row = {'Статус: \U0001F514': 'help_status', 'Дата: \U0001F4C5': 'hel_date', 'Цена: \U0001F4B2': 'help_price'}
 
         buttons = [InlineKeyboardButton(text=t, callback_data=d) for t, d in main_row.items()]
 
@@ -204,7 +204,7 @@ class InlineKB(InlineKeyboardMarkup):
 
         keys = {'<<': page - 1, '>>': page + 1}
 
-        if page < len(cart.cart) - 1 or page + 1 > len(cart.cart):
+        if page < 0 or page + 1 > len(cart.cart):
             return False
 
         buttons = [InlineKeyboardButton(text=t, callback_data=f'history_{cart_id}_{d}') for t, d in keys.items()]
@@ -212,25 +212,3 @@ class InlineKB(InlineKeyboardMarkup):
         self.add(*buttons)
         self.add(InlineKeyboardButton(text=f'<< Назад <<', callback_data='back_delete'))
         return self
-
-# class InlineKBNew(InlineKeyboardMarkup):
-#
-#     def __init__(self, iterable, named_arg, lookup_field=id, title_field='title', row_width=3):
-#         super().__init__(row_width=row_width)
-#
-#         self._iterable = iterable
-#         self._named_arg = named_arg
-#         self._lookup_field = lookup_field
-#         self._title_field = title_field
-#
-#     def generate_kb(self):
-#         buttons = []
-#
-#         for i in self._iterable:
-#             buttons.append(InlineKeyboardButton(
-#                 text=getattr(i, self._title_field),
-#                 callback_data=f'{self._named_arg}_' + str(getattr(i, self._lookup_field))
-#             ))
-#
-#         self.add(*buttons)
-#         return self

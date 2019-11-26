@@ -7,11 +7,9 @@ from keyboards import ReplyKB, InlineKB
 import config
 import keyboards
 from models import models as db
-# from models.models import UserMenuCounter as user_pos
-from utils.scripts import strike, get_cart_price, get_price, phone_validate
+from utils.scripts import get_cart_price, get_price, phone_validate
 from utils.cron import cron_decorator
 from flask import Flask, request, abort
-from datetime import timedelta
 
 
 app = Flask(__name__)
@@ -44,32 +42,32 @@ def start(message):
 
     greeting_str = 'Добро пожаловать в виртуальный мир BEATLEX'
     keyboard = ReplyKB().generate_kb(*keyboards.beginning_kb.values())
-    keyboard.add('Личный кабинет')
+    keyboard.add('Личный кабинет \U0001F468\U0001F3FC\U0000200D\U0001F4BB')
 
     bot.send_message(message.chat.id, greeting_str, reply_markup=keyboard)
 
 
-@bot.message_handler(func=lambda message: message.text == 'Корзина')
+@bot.message_handler(func=lambda message: 'Корзина' in message.text)
 def show_cart(message):
 
     user = db.User.objects(user_id=str(message.chat.id)).get()
     cart = db.Cart.objects(owner=user).get()
 
-    bot.send_message(message.chat.id, 'CART',
+    bot.send_message(message.chat.id, 'Корзина \U0001F6D2',
                      reply_markup=InlineKB().generate_cart_kb(cart))
 
 
-@bot.message_handler(func=lambda message: message.text == 'Личный кабинет')
+@bot.message_handler(func=lambda message: 'Личный кабинет' in message.text)
 def personal_account(message):
     keyboard = InlineKB().generate_pa(message.chat.id)
 
-    bot.send_message(message.chat.id, 'Личный Кабинет',
+    bot.send_message(message.chat.id, f'Личный Кабинет \U0001F468\U0001F3FC\U0000200D\U0001F4BB',
                      reply_markup=keyboard)
 
 
 @bot.callback_query_handler(func=lambda call: call.data.split('_')[0] == 'add')
 def edit_user_info(call):
-    print(call.data)
+
     user = db.User.objects(user_id=str(call.message.chat.id)).get()
 
     if call.data.split('_')[1] == 'phone':  # TODO Добавить верификацю с смс
@@ -83,26 +81,16 @@ def edit_user_info(call):
 
 @bot.callback_query_handler(func=lambda call: call.data.split('_')[0] == 'help')
 def popup_cart_help(call):
-    definition_help = {
-        'Название': 'Нажмите на названия чтобы вывести карту продукта',
-        'Цена': 'Нажмите на цену чтобы вывести старую цену продукта',
-        'Удалить': 'Нажмите на красный знакчок чтобы удалить товар с корзины',
-        'cart': 'Это общая цена всех товаров в корзине',  # TODO Попробовать добавить общую цену без скидок
-        'product': 'Здесь указано ваще текущее положение нажимайте кнопки < или > для перемещения',
-        'empty': 'Здесь нет товара',
-        'login': 'Здесь ваш логин',
-        'fullname': 'Здесь ваше имя в телеграмм',
-        'phone': 'Здесь ваш телефон'
-    }
 
     bot.answer_callback_query(callback_query_id=call.id,
                               show_alert=True,
                               text=f'HELP:\n'
-                                   f'{definition_help[call.data.split("_")[1]]}')
+                                   f'{db.Texts.objects(title=call.data.split("_")[1]).get().body}')
 
 
 @bot.callback_query_handler(func=lambda call: call.data.split('_')[0] == 'del')
 def delete_product_from_cart(call):
+
     user = db.User.objects(user_id=str(call.message.chat.id)).get()
     cart = db.Cart.objects(owner=user).get()
     product = db.Product.objects(id=call.data.split('_')[1]).get()
@@ -133,14 +121,15 @@ def buy_cart(call):  # FIXME Перенести в скрипиться поду
 
     cart.update(set__all_products=[])
 
-    bot.send_message(call.message.chat.id, 'Спасибо за покупку :)')
+    bot.send_message(call.message.chat.id, 'Спасибо за покупку \n\n'
+                                           'Приходите еще \U0001F3C3')
 
 
 @bot.callback_query_handler(func=lambda call: call.data.split('_')[0] == 'carthistory')
 def show_order_history(call):
-    keyboard = InlineKB().generate_order_history_kb(call.message.chat.id)
 
-    bot.send_message(call.message.chat.id, 'История покупок',
+    keyboard = InlineKB().generate_order_history_kb(call.message.chat.id)
+    bot.send_message(call.message.chat.id, 'История покупок \U0001F6D2',
                      reply_markup=keyboard)
 
 
@@ -152,13 +141,8 @@ def show_old_cart(call):
         bot.answer_callback_query(call.id, 'Больше нет товаров', show_alert=True)
         return
 
-    # user = db.User.objects(user_id=str(call.message.chat.id)).get()
     cart = db.OrderHistory.objects(id=cart_id).get()
-    # product = db.Product.objects(id=cart.cart).get()
-
     p = cart.cart[int(call.data.split('_')[2])]
-
-    print(call.data.split('_')[2])
 
     bot.send_photo(call.message.chat.id, p.img, caption=f'Вы вибрали продукт {p.title} \n\n'
                                                         f'Описание: \n'
@@ -166,16 +150,10 @@ def show_old_cart(call):
                                                         f'Цена: {get_price(p, for_print=True)}',
                    reply_markup=InlineKB().generate_swipe(int(call.data.split('_')[2]), cart_id)
                    )
-
-    # bot.send_photo(call.message.chat.id, p.img, caption=f'Вы вибрали продукт {p.title} \n\n'
-    #                                                           f'Описание: \n'
-    #                                                           f'{p.description} \n\n'
-    #                                                           f'Цена: {get_price(p, for_print=True)}',
-    #                reply_markup=InlineKB().generate_swipe(int(call.data.split('_')[2]), call.message.chat.id),
-    #                parse_mode='HTML')
+    bot.delete_message(call.message.chat.id, call.message.message_id)
 
 
-@bot.message_handler(func=lambda message: message.text == 'Последние новости')
+@bot.message_handler(func=lambda message: 'Последние новости' in message.text)
 def show_news(message):
     bot.send_message(message.chat.id, 'News')
 
@@ -184,7 +162,7 @@ def show_news(message):
         bot.send_message(message.chat.id, i.content)
 
 
-@bot.message_handler(func=lambda message: message.text == 'Продукти')
+@bot.message_handler(func=lambda message: 'Товары' in message.text)
 def show_category(message):
     keyboard = InlineKB().generate_kb(**{f'category_{d.id}': d.title for d in db.Category.get_root_categories()})
 
@@ -248,6 +226,7 @@ def show_product(call):
 
 @bot.callback_query_handler(func=lambda call: call.data.split('_')[0] in ['left', 'right'])
 def swipe(call):
+
     user = db.User.objects(user_id=str(call.message.chat.id)).get()
     category = db.Category.objects(title=call.data.split('_')[2]).get()
 
@@ -272,6 +251,7 @@ def swipe(call):
 
 @bot.callback_query_handler(func=lambda call: call.data.split('_')[0] == 'back')
 def go_back(call):
+
     if call.data.split('_')[1] == 'delete':
         bot.delete_message(call.message.chat.id, call.message.message_id)
         return
@@ -304,16 +284,22 @@ def go_back(call):
 
 @bot.callback_query_handler(func=lambda call: call.data.split('_')[0] == 'cart')
 def add_to_cart(call):
+
     user = db.User.objects(user_id=str(call.message.chat.id)).get()
+    product = db.Product.objects(id=call.data.split('_')[1]).get()
+
+    if product in db.Cart.objects(owner=user).get().all_products:
+        bot.answer_callback_query(call.id, f'{product.title} уже в корзине вы не можете доваить еще \U000026D4')
+        return
 
     if not db.Cart.objects(owner=user):
         user.create_cart()
 
-    product = db.Product.objects(id=call.data.split('_')[1]).get()
     user.update_cart(product)
+    bot.answer_callback_query(call.id, f'{product.title} добавлен в корзину \U00002714\U0000FE0F', show_alert=True)
 
 
-@bot.message_handler(func=lambda message: message.text == 'Продуккти со скидкой')
+@bot.message_handler(func=lambda message: 'Товары со скидкой' in message.text)
 def show_sales_products(message):
     products = db.Product.get_discount_product()
 
@@ -324,7 +310,7 @@ def show_sales_products(message):
                      reply_markup=keyboard)
 
 
-@bot.message_handler(func=lambda message: message.text == 'Информации о магазине')
+@bot.message_handler(func=lambda message: 'Информации о магазине' in message.text)
 def show_info(message):
     bot.send_message(message.chat.id, db.Texts.objects.first().title)
     bot.send_message(message.chat.id, db.Texts.objects.first().body)
