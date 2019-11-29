@@ -1,6 +1,5 @@
 from mongoengine import *
 from datetime import datetime
-from utils.scripts import default_photo
 
 connect('web_shop_bot')
 
@@ -9,6 +8,7 @@ class Texts(Document):
 
     title = StringField(unique=True)
     body = StringField(max_length=4096)
+    category = StringField(max_length=32)
 
 
 class Properties(DynamicEmbeddedDocument):
@@ -54,7 +54,7 @@ class Product(Document):
     is_discount = BooleanField(default=False)
     properties = EmbeddedDocumentField(Properties)
     category = ReferenceField(Category, reverse_delete_rule=NULLIFY)
-    img = BinaryField(default=default_photo())
+    img = BinaryField()
 
     @property
     def get_price(self):

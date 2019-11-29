@@ -62,4 +62,8 @@ class NewsScheme(Schema):
     date = fields.DateTime()
 
 
-
+class TextsScheme(Schema):
+    
+    id = fields.String()
+    title = fields.String()
+    body = fields.String()

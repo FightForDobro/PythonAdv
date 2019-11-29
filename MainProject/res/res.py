@@ -3,10 +3,12 @@ from flask import request
 
 from models.models import (Category,
                            Product,
-                           News)
+                           News,
+                           Texts)
 from schemes.schemes import (CategoryScheme,
                              ProductScheme,
-                             NewsScheme)
+                             NewsScheme,
+                             TextsScheme)
 import json
 
 
@@ -148,3 +150,30 @@ class NewsRes(Resource):
         obj.delete()
 
         return {n_id: 'DELETED'}
+
+
+class TextsRes(Resource):
+
+    def get(self, t_id=None):
+
+        if t_id:
+            return TextsScheme().dump(Texts.objects(id=t_id).get())
+
+        return TextsScheme().dump(Texts.objects, many=True)
+
+    def post(self):
+
+        obj = Texts(**request.json).save()
+        return TextsScheme().dump(obj)
+
+    def put(self, t_id):
+
+        obj = Texts.objects(id=t_id).get()
+        obj.update(**request.json)
+
+        return TextsScheme().dump(obj.reload())
+
+    def delete(self, t_id):
+        obj = Texts.objects(id=t_id).get()
+        obj.delete()
+        return {t_id: 'DELETED'}

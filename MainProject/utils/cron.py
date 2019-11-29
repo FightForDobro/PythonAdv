@@ -15,6 +15,4 @@ def cron_decorator(func):
     return wrapper
 
 
-# date = timedelta(days=2).total_seconds()
-# date = timedelta(seconds=5)
-# print(date)
+

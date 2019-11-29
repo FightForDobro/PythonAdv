@@ -21,6 +21,9 @@ from telebot.types import (
 
 
 class ReplyKB(ReplyKeyboardMarkup):
+    """
+    Class describe reply keyboard
+    """
 
     def __init__(self, one_time_keyboard=True, resize_keyboard=True, row_width=3):
         super().__init__(one_time_keyboard=one_time_keyboard,
@@ -29,6 +32,7 @@ class ReplyKB(ReplyKeyboardMarkup):
 
     def generate_kb(self, *args):
         """
+        Function generate keyboard
         :param args: Buttons names
         """
 
@@ -38,6 +42,10 @@ class ReplyKB(ReplyKeyboardMarkup):
 
 
 class InlineKB(InlineKeyboardMarkup):
+
+    """
+    Class describe inline keyboard
+    """
 
     queries = {
         'root': db.Category.get_root_categories()
@@ -49,6 +57,7 @@ class InlineKB(InlineKeyboardMarkup):
 
     def generate_kb(self, *args, **kwargs):  # FIXME Можно доавить сюда ключ
         """
+        Function generate inline keyboard
         :param args: Buttons names
         :param kwargs: Button names with specific callback_data
         """
@@ -65,11 +74,11 @@ class InlineKB(InlineKeyboardMarkup):
 
         return self
 
-    def generate_root_kb(self):
-
-        self.generate_kb()
-
     def generate_cart_kb(self, cart):
+        """
+        Function generate user cart buttons
+        :param cart: User's cart object
+        """
 
         cross_icon = u'\u274C'  # Значок -- красный крестик
 
@@ -99,6 +108,13 @@ class InlineKB(InlineKeyboardMarkup):
         # --------------------------------------------------------------------------
 
     def generate_products_buttons(self, user_id, category, b_count, back=False):
+        """
+        Function generate product inline menu
+        :param user_id: User id == User telegram id
+        :param category: Product Category
+        :param b_count: Buttons count must be divide by 3
+        :param back: If true decrements user position in menu
+        """
         
         if b_count % 3 != 0:
             
@@ -109,25 +125,26 @@ class InlineKB(InlineKeyboardMarkup):
         user = db.User.objects(user_id=user_id).get()
         products = db.Product.objects(category=category)
 
+        counter = {}
+
         if back:
             db.UserMenuCounter.objects(owner=user).update(dec__counter=b_count*2)
-
-        counter = {}
 
         if not db.UserMenuCounter.objects(owner=user):
             db.UserMenuCounter(**{'owner': user}).save()    
 
         counter.update({user_id: db.UserMenuCounter.objects(owner=user).get().counter})
-        
+
+        # ------------------- Блок проверяет границы меню ------------------------
         if counter[user_id] < 0:
             db.UserMenuCounter.objects(owner=user).update(counter=0)
             return False
 
         elif counter[user_id] > products.count():
             return False
+        # ------------------------------------------------------------------------
 
         buttons = []
-
         for i, p in enumerate(products[db.UserMenuCounter.objects(owner=user).get().counter::]):
 
             if len(buttons) == b_count + 3:
@@ -159,6 +176,10 @@ class InlineKB(InlineKeyboardMarkup):
         return self
 
     def generate_pa(self, user_id):
+        """
+        Function generate user account
+        :param user_id: User id == Telegram user id
+        """
 
         user = db.User.objects(user_id=str(user_id)).get()
 
@@ -178,13 +199,15 @@ class InlineKB(InlineKeyboardMarkup):
         return self
 
     def generate_order_history_kb(self, user_id):
+        """
+        Function generate user order history
+        :param user_id: User id == Telegram user id
+        """
 
         user = db.User.objects(user_id=str(user_id)).get()
-
         user_history = db.OrderHistory.objects(owner=user)
 
         main_row = {'Статус: \U0001F514': 'help_status', 'Дата: \U0001F4C5': 'hel_date', 'Цена: \U0001F4B2': 'help_price'}
-
         buttons = [InlineKeyboardButton(text=t, callback_data=d) for t, d in main_row.items()]
 
         self.add(*buttons)
@@ -199,6 +222,11 @@ class InlineKB(InlineKeyboardMarkup):
         return self
 
     def generate_swipe(self, page, cart_id):
+        """
+        Function generate swipe buttons for old cart
+        :param page: page count
+        :param cart_id: Cart object id
+        """
 
         cart = db.OrderHistory.objects(id=cart_id).get()
 
