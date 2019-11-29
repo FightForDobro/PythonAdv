@@ -14,16 +14,6 @@ from scripts import default_photo
 
 def category_seeder():
 
-    # genres = ['Action', 'Adventure', 'Horror']
-    #
-    # for genre in genres:
-    #
-    #     genre_dict = {
-    #         'title': genre,
-    #         'description': lorem.sentence(),
-    #         'is_root': False
-    #     }
-
     categories = ['VIDEO GAMES', 'MOVIE', 'MUSIC']
 
     for category in categories:
@@ -49,19 +39,28 @@ def category_seeder():
 
             Category.objects(title=k).get().add_subcategory(subcategory)
 
+    sub_category = {
+        'title': 'Action',
+        'description': lorem.sentence()
+    }
+    subsub_c = Category(**sub_category).save()
+    Category.objects(title='PC').get().add_subcategory(subsub_c)
+
 
 def product_seeder(amount):
 
-    games_names = ['DOOM', 'DIABLO', 'DOTA']
+    games_names = ['DOOM', 'DIABLO', 'DOTA', 'GTA', 'Rust', 'Grad', 'Need For Speed', 'The legend of Zelda',
+                   'Half-Life', 'BioShock', 'The Witcher', 'Portal', 'Tetris', 'Mario', 'Halo']
 
-    movies_names = ['Hunters of the Forest', 'Girl in pink', 'Wolf and Bear forest friends']
+    movies_names = ['Hunters of the Forest', 'Girl in pink', 'Wolf and Bear forest friends', 'Some movie', 'King'
+                    'Queen of the mexico', 'Green Land', 'Rome The Empire', 'Yakudza', 'Ice Cold', 'The Beast']
 
     music = ['AppleMusic subscribe']
 
     p_dict = {
         'Action': games_names,
-        # 'MOVIE': movies_names,
-        # 'MUSIC': music
+        'MOVIE': movies_names,
+        'MUSIC': music
     }
 
     for _ in range(amount):
@@ -81,7 +80,6 @@ def product_seeder(amount):
         }
 
         product = Product(**product_dict)
-#        product.img.put(default_photo, content_type='image/png/')
         product.save()
 
 
@@ -116,50 +114,9 @@ def definitions_help():
         Texts(**{'title': t,
                  'body': b}).save()
 
-# category_seeder()
-# product_seeder(7)
-# news_seeder(8)
-# definitions_help()
-# subsub_cut_example = {
-#     'title': 'Subcut of subcut',
-#     'description': 'i am the lowest in the current hierarchy'
-# }
-#
-# subsub_cut = Category(**subsub_cut_example).save()
-#
-#
-# subcut_example = {
-#     'title': 'Subcut of Root',
-#     'description': 'i am subcut of Root',
-#     'subcategory': [subsub_cut]
-# }
-#
-# subcut = Category(**subcut_example).save()
-#
-# cat_example = {
-#     'title': 'The root',
-#     'description': 'Root directory',
-#     'is_root': True,
-#     'subcategory': [subcut]
-# }
-#
-# Category(**cat_example).save()
-
-
-#category_seeder()
-#product_seeder(100)
-#news_seeder(8)
-
-#sub_category = {
-#   'title': 'Action',
-#    'description': lorem.sentence()
-#}
-
-#subsub_c = Category(**sub_category).save()
-
-# subsub_c = Category.objects(title='Action').get()
-#
-# main_c = Category.objects(title='PC').get().add_subcategory(subsub_c)
+category_seeder()
+product_seeder(100)
+news_seeder(8)
 
 
 

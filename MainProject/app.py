@@ -10,7 +10,6 @@ from models import models as db
 from utils.scripts import get_cart_price, get_price, phone_validate
 from utils.cron import cron_decorator
 from flask import Flask, request, abort
-from  datetime import timedelta
 
 app = Flask(__name__)
 bot = telebot.TeleBot(config.TOKEN)
@@ -388,7 +387,7 @@ def show_info(message):
 
 
 @cron_decorator
-def check_user_status(wait_time):
+def check_user_status():
     """
     Function check whether user block bot or not
     """
@@ -411,8 +410,8 @@ if __name__ == '__main__':
     bot.remove_webhook()
     time.sleep(1)
     bot.set_webhook(config.WEBHOOK_URL,
-                     certificate=open('webhook_cert.pem', 'r'))
-    check_user_status(int(timedelta(seconds=1).total_seconds()))
-#   bot.polling(none_stop=True)
+                    certificate=open('webhook_cert.pem', 'r'))
+    check_user_status()
+    # bot.polling(none_stop=True)
     app.run(debug=True)
 
